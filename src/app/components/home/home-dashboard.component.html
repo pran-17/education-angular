@@ -1,0 +1,64 @@
+<div class="dashboard-container">
+  <div class="header">
+    <h1>Smart Education System</h1>
+    <p>Choose your role to access the system</p>
+  </div>
+
+  <div class="cards-container">
+    <div class="role-card admin-card" (click)="navigateToAdmin()">
+      <div class="card-icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z" fill="currentColor"/>
+          <path d="M19 15L20.09 19.26L24 20L20.09 20.74L19 25L17.91 20.74L14 20L17.91 19.26L19 15Z" fill="currentColor"/>
+          <path d="M5 15L6.09 19.26L10 20L6.09 20.74L5 25L3.91 20.74L0 20L3.91 19.26L5 15Z" fill="currentColor"/>
+        </svg>
+      </div>
+      <h3>Administrator</h3>
+      <p>Manage teachers, students, and system settings</p>
+      <div class="card-features">
+        <span class="feature">• Teacher Management</span>
+        <span class="feature">• Student Management</span>
+        <span class="feature">• Timetable Management</span>
+      </div>
+      <button class="access-btn admin-btn">Access Admin Panel</button>
+    </div>
+
+    <div class="role-card teacher-card" (click)="navigateToTeacher()">
+      <div class="card-icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 6.5V7.5C15 8.3 14.3 9 13.5 9S12 8.3 12 7.5V6.5L6 7V9L12 8.5V9.5C12 10.3 12.7 11 13.5 11S15 10.3 15 9.5V8.5L21 9ZM12 13.5C8.7 13.5 6 15.2 6 17.5V20H18V17.5C18 15.2 15.3 13.5 12 13.5Z" fill="currentColor"/>
+        </svg>
+      </div>
+      <h3>Teacher</h3>
+      <p>Manage classes, grades, and student progress</p>
+      <div class="card-features">
+        <span class="feature">• Grade Management</span>
+        <span class="feature">• Quiz Creation</span>
+        <span class="feature">• Student Progress</span>
+      </div>
+      <button class="access-btn teacher-btn">Login as Teacher</button>
+    </div>
+
+    <div class="role-card student-card" (click)="navigateToStudent()">
+      <div class="card-icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z" fill="currentColor"/>
+        </svg>
+      </div>
+      <h3>Student</h3>
+      <p>View grades, attendance, and take quizzes</p>
+      <div class="card-features">
+        <span class="feature">• View Grades</span>
+        <span class="feature">• Check Attendance</span>
+        <span class="feature">• Take Quizzes</span>
+      </div>
+      <button class="access-btn student-btn">Login as Student</button>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>&copy; 2024 Smart Education System. All rights reserved.</p>
+  </div>
+</div>
+
+

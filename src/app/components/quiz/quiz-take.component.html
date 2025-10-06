@@ -1,0 +1,64 @@
+<div class="quiz-container">
+  <div class="quiz-card" *ngIf="!loading && !error && !submitted && quiz">
+    <div class="quiz-header">
+      <h1>{{ quiz.subject_code }} - Quiz</h1>
+      <div class="quiz-meta">
+        <span>Class: {{ quiz.class }}</span>
+        <span>Questions: {{ quiz.questions.length }}</span>
+      </div>
+    </div>
+
+    <div class="questions-section">
+      <div *ngFor="let question of quiz.questions; let i = index" class="question-card">
+        <div class="question-number">Question {{ i + 1 }}</div>
+        <h3 class="question-text">{{ question.question }}</h3>
+
+        <div class="options">
+          <div
+            *ngFor="let option of question.options; let j = index"
+            class="option"
+            [class.selected]="answers[i] === j"
+            (click)="selectAnswer(i, j)">
+            <div class="option-radio">
+              <div class="radio-dot" *ngIf="answers[i] === j"></div>
+            </div>
+            <span class="option-text">{{ option }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="quiz-footer">
+      <button (click)="submitQuiz()" class="submit-btn" [disabled]="loading">
+        {{ loading ? 'Submitting...' : 'Submit Quiz' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="result-card" *ngIf="submitted">
+    <div class="success-icon">✓</div>
+    <h2>Quiz Submitted Successfully!</h2>
+    <div class="score-display">
+      <div class="score-value">{{ score }}%</div>
+      <div class="score-label">Your Score</div>
+    </div>
+    <p class="success-message">{{ message }}</p>
+    <button (click)="goToDashboard()" class="dashboard-btn">
+      Go to Dashboard
+    </button>
+  </div>
+
+  <div class="error-card" *ngIf="error">
+    <div class="error-icon">✕</div>
+    <h2>Unable to Load Quiz</h2>
+    <p class="error-message">{{ error }}</p>
+    <button (click)="goToDashboard()" class="dashboard-btn">
+      Go to Dashboard
+    </button>
+  </div>
+
+  <div class="loading-overlay" *ngIf="loading && !quiz">
+    <div class="spinner"></div>
+    <p>Loading quiz...</p>
+  </div>
+</div>

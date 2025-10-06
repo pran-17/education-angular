@@ -1,0 +1,208 @@
+.dashboard-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 3rem;
+  color: white;
+}
+
+.header h1 {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.header p {
+  font-size: 1.2rem;
+  opacity: 0.9;
+  font-weight: 300;
+}
+
+.cards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  margin-bottom: 3rem;
+}
+
+.role-card {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.role-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+}
+
+.role-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.admin-card::before {
+  background: linear-gradient(90deg, #ff6b6b, #ee5a24);
+}
+
+.teacher-card::before {
+  background: linear-gradient(90deg, #4ecdc4, #44a08d);
+}
+
+.student-card::before {
+  background: linear-gradient(90deg, #a8e6cf, #7fcdcd);
+}
+
+.card-icon {
+  margin-bottom: 1.5rem;
+  color: #667eea;
+}
+
+.admin-card .card-icon {
+  color: #ff6b6b;
+}
+
+.teacher-card .card-icon {
+  color: #4ecdc4;
+}
+
+.student-card .card-icon {
+  color: #7fcdcd;
+}
+
+.role-card h3 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.role-card p {
+  color: #666;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.card-features {
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+.feature {
+  display: block;
+  color: #555;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.access-btn {
+  width: 100%;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.admin-btn {
+  background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+}
+
+.admin-btn:hover {
+  background: linear-gradient(45deg, #ee5a24, #ff6b6b);
+  transform: scale(1.05);
+}
+
+.teacher-btn {
+  background: linear-gradient(45deg, #4ecdc4, #44a08d);
+}
+
+.teacher-btn:hover {
+  background: linear-gradient(45deg, #44a08d, #4ecdc4);
+  transform: scale(1.05);
+}
+
+.student-btn {
+  background: linear-gradient(45deg, #a8e6cf, #7fcdcd);
+}
+
+.student-btn:hover {
+  background: linear-gradient(45deg, #7fcdcd, #a8e6cf);
+  transform: scale(1.05);
+}
+
+.footer {
+  text-align: center;
+  color: white;
+  opacity: 0.8;
+  margin-top: 2rem;
+}
+
+.footer p {
+  font-size: 0.9rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 1rem;
+  }
+  
+  .header h1 {
+    font-size: 2rem;
+  }
+  
+  .cards-container {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .role-card {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .header p {
+    font-size: 1rem;
+  }
+  
+  .role-card h3 {
+    font-size: 1.5rem;
+  }
+  
+  .access-btn {
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+  }
+}
+
+

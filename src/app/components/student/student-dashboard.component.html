@@ -1,0 +1,174 @@
+<div class="student-container">
+  <header class="student-header">
+    <div>
+      <h1>Student Dashboard</h1>
+      <p class="student-info">Welcome, {{ currentUser?.name }}</p>
+    </div>
+    <button (click)="logout()" class="logout-btn">Logout</button>
+  </header>
+
+  <div class="tabs">
+    <button [class.active]="activeTab === 'profile'" (click)="setActiveTab('profile')" class="tab-btn">
+      Profile
+    </button>
+    <button [class.active]="activeTab === 'marks'" (click)="setActiveTab('marks')" class="tab-btn">
+      My Marks
+    </button>
+    <button [class.active]="activeTab === 'attendance'" (click)="setActiveTab('attendance')" class="tab-btn">
+      Attendance
+    </button>
+  </div>
+
+  <div class="content">
+    <div *ngIf="activeTab === 'profile'" class="tab-content">
+      <div class="profile-card">
+        <h2>Your Profile</h2>
+        <div class="profile-info">
+          <div class="info-item">
+            <span class="label">Name:</span>
+            <span class="value">{{ currentUser?.name }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Student ID:</span>
+            <span class="value">{{ currentUser?.student_id }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Email:</span>
+            <span class="value">{{ currentUser?.email }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Class:</span>
+            <span class="value">{{ currentUser?.class }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value">{{ marks.length }}</div>
+          <div class="stat-label">Subjects Enrolled</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ getPresentCount() }}</div>
+          <div class="stat-label">Classes Attended</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ getTotalMarksSum() }}</div>
+          <div class="stat-label">Total Marks</div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="activeTab === 'marks'" class="tab-content">
+      <div class="marks-section">
+        <h2>My Marks</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Subject Code</th>
+                <th>Test 1</th>
+                <th>Test 2</th>
+                <th>CAT 1</th>
+                <th>Mid-Semester</th>
+                <th>Quiz Marks</th>
+                <th>Total</th>
+                <th>Attendance</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let mark of marks">
+                <td><strong>{{ mark.subject_code }}</strong></td>
+                <td>{{ mark.test1 || 0 }}</td>
+                <td>{{ mark.test2 || 0 }}</td>
+                <td>{{ mark.cat1 || 0 }}</td>
+                <td>{{ mark.mid_semester || 0 }}</td>
+                <td>{{ mark.quiz_marks || 0 }}</td>
+                <td><strong>{{ getTotalMarks(mark) }}</strong></td>
+                <td>
+                  <span class="attendance-badge" [class.good]="getAttendancePercentage(mark.subject_code) >= 75"
+                        [class.warning]="getAttendancePercentage(mark.subject_code) >= 50 && getAttendancePercentage(mark.subject_code) < 75"
+                        [class.danger]="getAttendancePercentage(mark.subject_code) < 50">
+                    {{ getAttendancePercentage(mark.subject_code) }}%
+                  </span>
+                </td>
+              </tr>
+              <tr *ngIf="marks.length === 0">
+                <td colspan="8" class="empty">No marks data available</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="activeTab === 'attendance'" class="tab-content">
+      <div class="attendance-section">
+        <h2>Attendance Records</h2>
+
+        <div class="attendance-summary">
+          <h3>Summary by Subject</h3>
+          <div class="summary-grid">
+            <div *ngFor="let subject of getAttendanceBySubject() | keyvalue" class="summary-card">
+              <div class="subject-name">{{ subject.key }}</div>
+              <div class="attendance-stats">
+                <div class="stat">
+                  <span class="count">{{ getSubjectPresentCount(subject.value) }}</span>
+                  <span class="text">Present</span>
+                </div>
+                <div class="stat">
+                  <span class="count">{{ getSubjectAbsentCount(subject.value) }}</span>
+                  <span class="text">Absent</span>
+                </div>
+                <div class="stat">
+                  <span class="count">{{ subject.value.length }}</span>
+                  <span class="text">Total</span>
+                </div>
+              </div>
+              <div class="percentage" [class.good]="getAttendancePercentage(subject.key) >= 75"
+                   [class.warning]="getAttendancePercentage(subject.key) >= 50 && getAttendancePercentage(subject.key) < 75"
+                   [class.danger]="getAttendancePercentage(subject.key) < 50">
+                {{ getAttendancePercentage(subject.key) }}% Attendance
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="attendance-details">
+          <h3>Detailed Records</h3>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Subject Code</th>
+                  <th>Status</th>
+                  <th>Marked Via</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let att of attendance">
+                  <td>{{ att.date | date:'mediumDate' }}</td>
+                  <td>{{ att.subject_code }}</td>
+                  <td>
+                    <span class="status-badge" [class.present]="att.status === 'Present'" [class.absent]="att.status === 'Absent'">
+                      {{ att.status }}
+                    </span>
+                  </td>
+                  <td>{{ att.marked_via || 'N/A' }}</td>
+                </tr>
+                <tr *ngIf="attendance.length === 0">
+                  <td colspan="4" class="empty">No attendance records available</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading-overlay">
+    <div class="spinner"></div>
+  </div>
+</div>

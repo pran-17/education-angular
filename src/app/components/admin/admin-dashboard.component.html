@@ -1,0 +1,232 @@
+<div class="admin-container">
+  <header class="admin-header">
+    <h1>Admin Dashboard</h1>
+    <button (click)="logout()" class="logout-btn">Logout</button>
+  </header>
+
+  <div class="tabs">
+    <button
+      [class.active]="activeTab === 'teachers'"
+      (click)="setActiveTab('teachers')"
+      class="tab-btn">
+      Manage Teachers
+    </button>
+    <button
+      [class.active]="activeTab === 'students'"
+      (click)="setActiveTab('students')"
+      class="tab-btn">
+      Manage Students
+    </button>
+    <button
+      [class.active]="activeTab === 'timetable'"
+      (click)="setActiveTab('timetable')"
+      class="tab-btn">
+      Manage Timetable
+    </button>
+  </div>
+
+  <div class="message" *ngIf="message" [class.success]="messageType === 'success'" [class.error]="messageType === 'error'">
+    {{ message }}
+  </div>
+
+  <div class="content">
+    <div *ngIf="activeTab === 'teachers'" class="tab-content">
+      <div class="form-section">
+        <h2>Add New Teacher</h2>
+        <form (ngSubmit)="addTeacher()" class="data-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Teacher ID</label>
+              <input type="text" [(ngModel)]="newTeacher.teacher_id" name="teacher_id" placeholder="e.g., T001">
+            </div>
+            <div class="form-group">
+              <label>Name</label>
+              <input type="text" [(ngModel)]="newTeacher.name" name="name" placeholder="Full name">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" [(ngModel)]="newTeacher.email" name="email" placeholder="email@example.com">
+            </div>
+            <div class="form-group">
+              <label>Subject</label>
+              <input type="text" [(ngModel)]="newTeacher.subject" name="subject" placeholder="Subject taught">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" [(ngModel)]="newTeacher.password" name="password" placeholder="Set password">
+          </div>
+          <button type="submit" class="submit-btn" [disabled]="loading">
+            {{ loading ? 'Adding...' : 'Add Teacher' }}
+          </button>
+        </form>
+      </div>
+
+      <div class="list-section">
+        <h2>All Teachers ({{ teachers.length }})</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Teacher ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Subject</th>
+                <th>Added On</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let teacher of teachers">
+                <td>{{ teacher.teacher_id }}</td>
+                <td>{{ teacher.name }}</td>
+                <td>{{ teacher.email }}</td>
+                <td>{{ teacher.subject }}</td>
+                <td>{{ teacher.created_at | date:'short' }}</td>
+              </tr>
+              <tr *ngIf="teachers.length === 0">
+                <td colspan="5" class="empty">No teachers added yet</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="activeTab === 'students'" class="tab-content">
+      <div class="form-section">
+        <h2>Add New Student</h2>
+        <form (ngSubmit)="addStudent()" class="data-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Student ID</label>
+              <input type="text" [(ngModel)]="newStudent.student_id" name="student_id" placeholder="e.g., S001">
+            </div>
+            <div class="form-group">
+              <label>Name</label>
+              <input type="text" [(ngModel)]="newStudent.name" name="name" placeholder="Full name">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" [(ngModel)]="newStudent.email" name="email" placeholder="email@example.com">
+            </div>
+            <div class="form-group">
+              <label>Class</label>
+              <input type="text" [(ngModel)]="newStudent.class" name="class" placeholder="e.g., 10A">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" [(ngModel)]="newStudent.password" name="password" placeholder="Set password">
+          </div>
+          <button type="submit" class="submit-btn" [disabled]="loading">
+            {{ loading ? 'Adding...' : 'Add Student' }}
+          </button>
+        </form>
+      </div>
+
+      <div class="list-section">
+        <h2>All Students ({{ students.length }})</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Student ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Class</th>
+                <th>Added On</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let student of students">
+                <td>{{ student.student_id }}</td>
+                <td>{{ student.name }}</td>
+                <td>{{ student.email }}</td>
+                <td>{{ student.class }}</td>
+                <td>{{ student.created_at | date:'short' }}</td>
+              </tr>
+              <tr *ngIf="students.length === 0">
+                <td colspan="5" class="empty">No students added yet</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="activeTab === 'timetable'" class="tab-content">
+      <div class="form-section">
+        <h2>Add Timetable Entry</h2>
+        <form (ngSubmit)="addTimetable()" class="data-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Subject Code</label>
+              <input type="text" [(ngModel)]="newTimetable.subject_code" name="subject_code" placeholder="e.g., CS101">
+            </div>
+            <div class="form-group">
+              <label>Subject Name</label>
+              <input type="text" [(ngModel)]="newTimetable.subject_name" name="subject_name" placeholder="e.g., Data Structures">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Credit Hours</label>
+              <input type="number" [(ngModel)]="newTimetable.credit_hours" name="credit_hours" placeholder="e.g., 3">
+            </div>
+            <div class="form-group">
+              <label>Class</label>
+              <input type="text" [(ngModel)]="newTimetable.class" name="class" placeholder="e.g., 10A">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Assign Teacher</label>
+            <select [(ngModel)]="newTimetable.teacher_id" name="teacher_id">
+              <option value="">Select a teacher</option>
+              <option *ngFor="let teacher of teachers" [value]="teacher._id">
+                {{ teacher.name }} ({{ teacher.subject }})
+              </option>
+            </select>
+          </div>
+          <button type="submit" class="submit-btn" [disabled]="loading">
+            {{ loading ? 'Adding...' : 'Add Timetable' }}
+          </button>
+        </form>
+      </div>
+
+      <div class="list-section">
+        <h2>All Timetable Entries ({{ timetables.length }})</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Subject Code</th>
+                <th>Subject Name</th>
+                <th>Credit Hours</th>
+                <th>Class</th>
+                <th>Teacher</th>
+                <th>Created On</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let timetable of timetables">
+                <td>{{ timetable.subject_code }}</td>
+                <td>{{ timetable.subject_name }}</td>
+                <td>{{ timetable.credit_hours }}</td>
+                <td>{{ timetable.class }}</td>
+                <td>{{ getTeacherName(timetable) }}</td>
+                <td>{{ timetable.created_at | date:'short' }}</td>
+              </tr>
+              <tr *ngIf="timetables.length === 0">
+                <td colspan="6" class="empty">No timetable entries yet</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
