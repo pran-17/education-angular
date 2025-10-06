@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { MongoDBService, Marks, Attendance } from '../../services/mongodb.service';
+import { MongoDBService, Marks, Attendance, Quiz } from '../../services/mongodb.service';
 
 @Component({
   selector: 'app-student-dashboard',
@@ -10,11 +10,12 @@ import { MongoDBService, Marks, Attendance } from '../../services/mongodb.servic
   styleUrls: ['./student-dashboard.component.css']
 })
 export class StudentDashboardComponent implements OnInit {
-  activeTab: 'profile' | 'marks' | 'attendance' = 'profile';
+  activeTab: 'profile' | 'marks' | 'attendance' | 'quizzes' = 'profile';
   currentUser: any;
 
   marks: Marks[] = [];
   attendance: Attendance[] = [];
+  quizzes: Quiz[] = [];
 
   loading = false;
   message = '';
@@ -37,8 +38,12 @@ export class StudentDashboardComponent implements OnInit {
   async loadData() {
     this.loading = true;
     try {
-      this.marks = await this.mongodb.getStudentMarks(this.currentUser._id);
-      this.attendance = await this.mongodb.getStudentAttendance(this.currentUser._id);
+      this.marks = await this.mongodb.getStudentMarks(this.currentUser.student_id);
+      console.log('📥 Loaded student marks:', this.marks);
+      this.attendance = await this.mongodb.getStudentAttendance(this.currentUser.student_id);
+      console.log('📥 Loaded student attendance:', this.attendance);
+      this.quizzes = await this.mongodb.getActiveQuizzesForClass(this.currentUser.class);
+      console.log('📥 Loaded active quizzes for class:', this.currentUser.class, this.quizzes);
     } catch (error: any) {
       this.message = error.message;
     } finally {
@@ -46,7 +51,7 @@ export class StudentDashboardComponent implements OnInit {
     }
   }
 
-  setActiveTab(tab: 'profile' | 'marks' | 'attendance') {
+  setActiveTab(tab: 'profile' | 'marks' | 'attendance' | 'quizzes') {
     this.activeTab = tab;
   }
 
@@ -88,6 +93,10 @@ export class StudentDashboardComponent implements OnInit {
 
   getSubjectAbsentCount(attendances: Attendance[]): number {
     return attendances.filter(a => a.status === 'Absent').length;
+  }
+
+  goHome() {
+    this.router.navigate(['/home']);
   }
 
   logout() {

@@ -1,13 +1,15 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./components/home/home-dashboard.component').then(m => m.HomeDashboardComponent)
+    redirectTo: '/home',
+    pathMatch: 'full'
   },
   {
     path: 'home',
-    loadComponent: () => import('./components/home/home-dashboard.component').then(m => m.HomeDashboardComponent)
+    loadComponent: () => import('./components/home/home.component').then(m => m.HomeComponent)
   },
   {
     path: 'login',
@@ -19,11 +21,15 @@ export const routes: Routes = [
   },
   {
     path: 'teacher',
-    loadComponent: () => import('./components/teacher/teacher-dashboard.component').then(m => m.TeacherDashboardComponent)
+    loadComponent: () => import('./components/teacher/teacher-dashboard.component').then(m => m.TeacherDashboardComponent),
+    canActivate: [authGuard],
+    data: { roles: ['teacher'] }
   },
   {
     path: 'student',
-    loadComponent: () => import('./components/student/student-dashboard.component').then(m => m.StudentDashboardComponent)
+    loadComponent: () => import('./components/student/student-dashboard.component').then(m => m.StudentDashboardComponent),
+    canActivate: [authGuard],
+    data: { roles: ['student'] }
   },
   {
     path: 'quiz/:code',

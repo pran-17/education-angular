@@ -3,13 +3,12 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-home-dashboard',
+  selector: 'app-home',
   imports: [CommonModule],
-  templateUrl: './home-dashboard.component.html',
-  styleUrls: ['./home-dashboard.component.css']
+  templateUrl: './home.component.html',
+  styleUrls: ['./home.component.css']
 })
-export class HomeDashboardComponent {
-
+export class HomeComponent {
   constructor(private router: Router) {}
 
   navigateToAdmin() {
@@ -17,12 +16,11 @@ export class HomeDashboardComponent {
   }
 
   navigateToTeacher() {
-    this.router.navigate(['/login']);
+    this.router.navigate(['/login'], { queryParams: { role: 'teacher' } });
   }
 
   navigateToStudent() {
-    this.router.navigate(['/login']);
+    this.router.navigate(['/login'], { queryParams: { role: 'student' } });
   }
 }
-
 

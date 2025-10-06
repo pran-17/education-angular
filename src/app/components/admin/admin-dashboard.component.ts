@@ -51,26 +51,19 @@ export class AdminDashboardComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    // Set up default admin user for direct access
-    const defaultAdmin = {
-      id: 'admin',
-      email: 'admin@system.com',
-      name: 'System Administrator',
-      role: 'admin'
-    };
-    
-    // Set the admin user in the service
-    localStorage.setItem('currentUser', JSON.stringify(defaultAdmin));
-    this.mongodb['currentUserSubject'].next(defaultAdmin);
-
+    // Admin access does not require login
+    console.log('🛠️ Admin panel accessed without login');
     this.loadData();
   }
 
   async loadData() {
     try {
       this.teachers = await this.mongodb.getTeachers();
+      console.log('📥 Loaded teachers:', this.teachers);
       this.students = await this.mongodb.getStudents();
+      console.log('📥 Loaded students:', this.students);
       this.timetables = await this.mongodb.getTimetables();
+      console.log('📥 Loaded timetables:', this.timetables);
     } catch (error: any) {
       this.showMessage(error.message, 'error');
     }
@@ -198,9 +191,12 @@ export class AdminDashboardComponent implements OnInit {
     return timetable.teachers?.name || 'N/A';
   }
 
+  goHome() {
+    this.router.navigate(['/home']);
+  }
+
   logout() {
     this.mongodb.logout();
-    // Redirect to home dashboard
     this.router.navigate(['/home']);
   }
 }

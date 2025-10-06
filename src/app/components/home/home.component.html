@@ -1,0 +1,64 @@
+<div class="home-container">
+  <div class="home-header">
+    <h1>Smart Education Platform</h1>
+    <p class="subtitle">Choose your role to continue</p>
+  </div>
+
+  <div class="dashboard-cards">
+    <div class="dashboard-card admin-card" (click)="navigateToAdmin()">
+      <div class="card-icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+          <path d="M2 17l10 5 10-5"/>
+          <path d="M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <h2>Admin Access</h2>
+      <p>Manage teachers, students, and timetables</p>
+      <ul class="features">
+        <li>Add new teachers and students</li>
+        <li>Generate and manage timetables</li>
+        <li>View system overview</li>
+      </ul>
+      <button class="access-btn admin-btn">Access Admin Panel</button>
+    </div>
+
+    <div class="dashboard-card teacher-card" (click)="navigateToTeacher()">
+      <div class="card-icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+      </div>
+      <h2>Teacher Dashboard</h2>
+      <p>Manage students, marks, and quizzes</p>
+      <ul class="features">
+        <li>Add and update student marks</li>
+        <li>Mark student attendance</li>
+        <li>Generate quizzes for evaluation</li>
+      </ul>
+      <button class="access-btn teacher-btn">Login as Teacher</button>
+    </div>
+
+    <div class="dashboard-card student-card" (click)="navigateToStudent()">
+      <div class="card-icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+        </svg>
+      </div>
+      <h2>Student Dashboard</h2>
+      <p>View your academic progress</p>
+      <ul class="features">
+        <li>View your marks and grades</li>
+        <li>Check attendance records</li>
+        <li>Attend online quizzes</li>
+      </ul>
+      <button class="access-btn student-btn">Login as Student</button>
+    </div>
+  </div>
+
+  <div class="home-footer">
+    <p>Smart Education Platform - Empowering Learning Through Technology</p>
+  </div>
+</div>
+

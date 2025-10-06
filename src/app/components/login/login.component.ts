@@ -22,7 +22,14 @@ export class LoginComponent {
   constructor(
     private mongodb: MongoDBService,
     private router: Router
-  ) {}
+  ) {
+    // Check for role from query params
+    const urlParams = new URLSearchParams(window.location.search);
+    const role = urlParams.get('role');
+    if (role && ['admin', 'teacher', 'student'].includes(role)) {
+      this.selectedRole = role as 'admin' | 'teacher' | 'student';
+    }
+  }
 
   async login() {
     this.error = '';
@@ -57,5 +64,9 @@ export class LoginComponent {
   selectRole(role: 'admin' | 'teacher' | 'student') {
     this.selectedRole = role;
     this.error = '';
+  }
+
+  goBack() {
+    this.router.navigate(['/home']);
   }
 }

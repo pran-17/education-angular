@@ -210,6 +210,7 @@ export class MongoDBService {
   }
 
   async addTeacher(teacher: Teacher): Promise<any> {
+    console.log('📝 Adding new teacher:', teacher);
     const passwordHash = await this.hashPassword(teacher.password || '');
     const { password, ...teacherData } = teacher;
 
@@ -221,10 +222,13 @@ export class MongoDBService {
     };
 
     this.teachers.push(newTeacher);
+    console.log('✅ Teacher added successfully:', newTeacher);
+    console.log('📊 Current teachers in database:', this.teachers);
     return newTeacher;
   }
 
   async addStudent(student: Student): Promise<any> {
+    console.log('📝 Adding new student:', student);
     const passwordHash = await this.hashPassword(student.password || '');
     const { password, ...studentData } = student;
 
@@ -236,6 +240,8 @@ export class MongoDBService {
     };
 
     this.students.push(newStudent);
+    console.log('✅ Student added successfully:', newStudent);
+    console.log('📊 Current students in database:', this.students);
     return newStudent;
   }
 
@@ -323,7 +329,21 @@ export class MongoDBService {
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }
 
+  async createAttendance(att: Attendance): Promise<Attendance> {
+    console.log('📝 Creating attendance record:', att);
+    const newAttendance: Attendance = {
+      ...att,
+      _id: this.generateId(),
+      created_at: new Date()
+    };
+    this.attendance.push(newAttendance);
+    console.log('✅ Attendance created successfully:', newAttendance);
+    console.log('📊 Current attendance records:', this.attendance);
+    return newAttendance;
+  }
+
   async createQuiz(quiz: Quiz): Promise<any> {
+    console.log('📝 Creating new quiz:', quiz);
     const newQuiz: Quiz = {
       ...quiz,
       _id: this.generateId(),
@@ -331,6 +351,8 @@ export class MongoDBService {
     };
 
     this.quizzes.push(newQuiz);
+    console.log('✅ Quiz created successfully:', newQuiz);
+    console.log('📊 Current quizzes in database:', this.quizzes);
     return newQuiz;
   }
 
@@ -408,6 +430,13 @@ export class MongoDBService {
     return attendanceWithStudents.sort((a, b) => 
       new Date(b.date).getTime() - new Date(a.date).getTime()
     );
+  }
+
+  async getActiveQuizzesForClass(className: string): Promise<Quiz[]> {
+    const quizzes = this.quizzes
+      .filter(q => q.class === className && q.active);
+    console.log('📣 Fetching active quizzes for class:', className, quizzes);
+    return quizzes.sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
   }
 
   private generateId(): string {

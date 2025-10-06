@@ -1,6 +1,7 @@
 <div class="student-container">
   <header class="student-header">
     <div>
+      <button (click)="goHome()" class="home-btn">← Home</button>
       <h1>Student Dashboard</h1>
       <p class="student-info">Welcome, {{ currentUser?.name }}</p>
     </div>
@@ -16,6 +17,9 @@
     </button>
     <button [class.active]="activeTab === 'attendance'" (click)="setActiveTab('attendance')" class="tab-btn">
       Attendance
+    </button>
+    <button [class.active]="activeTab === 'quizzes'" (click)="setActiveTab('quizzes')" class="tab-btn">
+      Quizzes
     </button>
   </div>
 
@@ -163,6 +167,41 @@
               </tbody>
             </table>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="activeTab === 'quizzes'" class="tab-content">
+      <div class="quiz-section">
+        <h2>Available Quizzes</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Subject Code</th>
+                <th>Class</th>
+                <th>Code</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let quiz of quizzes">
+                <td>{{ quiz.subject_code }}</td>
+                <td>{{ quiz.class }}</td>
+                <td><code>{{ quiz.quiz_code }}</code></td>
+                <td>
+                  <span [class.active]="quiz.active" [class.inactive]="!quiz.active">{{ quiz.active ? 'Active' : 'Closed' }}</span>
+                </td>
+                <td>
+                  <a [href]="'/quiz/' + quiz.quiz_code" class="take-quiz-btn">Take Quiz</a>
+                </td>
+              </tr>
+              <tr *ngIf="quizzes.length === 0">
+                <td colspan="5" class="empty">No active quizzes for your class</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
