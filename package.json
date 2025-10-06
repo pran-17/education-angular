@@ -4,7 +4,8 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build"
+    "build": "ng build",
+    "backend": "cd backend && npm install && npm start"
   },
   "dependencies": {
     "@angular/animations": "^20.0.0",
