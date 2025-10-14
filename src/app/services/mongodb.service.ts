@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import * as bcrypt from 'bcryptjs';
+import { HttpClient } from '@angular/common/http';
 
 // MongoDB Models (using Mongoose-like structure)
 export interface Teacher {
@@ -126,7 +127,9 @@ export class MongoDBService {
   private loginAudit: Array<{ role: string; id: string; email: string; timestamp: string }>= [];
   private mongoSetupLogged = false;
 
-  constructor() {
+  private apiBase = 'http://localhost:4000/api';
+
+  constructor(private http: HttpClient) {
     this.loadUser();
     this.initializeDefaultData();
     this.loadQuizzesFromStorage();
@@ -263,35 +266,21 @@ export class MongoDBService {
   }
 
   async teacherLogin(email: string, teacherId: string, password: string): Promise<any> {
-    const teacher = this.teachers.find(t => 
-      t.email === email && t.teacher_id === teacherId
-    );
-
-    if (!teacher) {
-      throw new Error('Invalid credentials or teacher not found in system');
-    }
-
-    const userData = { ...teacher, role: 'teacher' };
-    localStorage.setItem('currentUser', JSON.stringify(userData));
-    this.currentUserSubject.next(userData);
-    this.recordLogin('teacher', teacher.teacher_id, email);
-    return userData;
+    const user = await this.http.post<any>(`${this.apiBase}/teachers/login`, { email, teacher_id: teacherId, password }).toPromise();
+    if (!user) throw new Error('Invalid credentials');
+    localStorage.setItem('currentUser', JSON.stringify(user));
+    this.currentUserSubject.next(user);
+    this.recordLogin('teacher', user.teacher_id, email);
+    return user;
   }
 
   async studentLogin(email: string, studentId: string, password: string): Promise<any> {
-    const student = this.students.find(s => 
-      s.email === email && s.student_id === studentId
-    );
-
-    if (!student) {
-      throw new Error('Invalid credentials or student not found in system');
-    }
-
-    const userData = { ...student, role: 'student' };
-    localStorage.setItem('currentUser', JSON.stringify(userData));
-    this.currentUserSubject.next(userData);
-    this.recordLogin('student', student.student_id, email);
-    return userData;
+    const user = await this.http.post<any>(`${this.apiBase}/students/login`, { email, student_id: studentId, password }).toPromise();
+    if (!user) throw new Error('Invalid credentials');
+    localStorage.setItem('currentUser', JSON.stringify(user));
+    this.currentUserSubject.next(user);
+    this.recordLogin('student', user.student_id, email);
+    return user;
   }
 
   private recordLogin(role: string, id: string, email: string) {
@@ -322,55 +311,25 @@ export class MongoDBService {
   }
 
   async addTeacher(teacher: Teacher): Promise<any> {
-    console.log('📝 Adding new teacher:', teacher);
-    const passwordHash = await this.hashPassword(teacher.password || '');
-    const { password, ...teacherData } = teacher;
-
-    const newTeacher: Teacher = {
-      ...teacherData,
-      _id: this.generateId(),
-      password_hash: passwordHash,
-      created_at: new Date()
-    };
-
-    this.teachers.push(newTeacher);
-    this.saveToSession();
-    console.log('✅ Teacher added successfully:', newTeacher);
-    console.log('📊 Current teachers in database:', this.teachers);
-    return newTeacher;
+    const payload = { ...teacher, password: teacher.password } as any;
+    const created = await this.http.post(`${this.apiBase}/teachers`, payload).toPromise();
+    return created as any;
   }
 
   async addStudent(student: Student): Promise<any> {
-    console.log('📝 Adding new student:', student);
-    const passwordHash = await this.hashPassword(student.password || '');
-    const { password, ...studentData } = student;
-
-    const newStudent: Student = {
-      ...studentData,
-      _id: this.generateId(),
-      password_hash: passwordHash,
-      created_at: new Date()
-    };
-
-    this.students.push(newStudent);
-    this.saveToSession();
-    console.log('✅ Student added successfully:', newStudent);
-    console.log('📊 Current students in database:', this.students);
-    return newStudent;
+    const payload = { ...student, password: student.password } as any;
+    const created = await this.http.post(`${this.apiBase}/students`, payload).toPromise();
+    return created as any;
   }
 
   async getTeachers(): Promise<Teacher[]> {
-    this.loadFromSession();
-    return [...this.teachers].sort((a, b) => 
-      new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
-    );
+    const items = await this.http.get<Teacher[]>(`${this.apiBase}/teachers`).toPromise();
+    return items || [];
   }
 
   async getStudents(): Promise<Student[]> {
-    this.loadFromSession();
-    return [...this.students].sort((a, b) => 
-      new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
-    );
+    const items = await this.http.get<Student[]>(`${this.apiBase}/students`).toPromise();
+    return items || [];
   }
 
   async addTimetable(timetable: Timetable): Promise<any> {

@@ -12,8 +12,8 @@ import { MongoDBService } from '../../services/mongodb.service';
   styleUrls: ['./admin-login.component.css']
 })
 export class AdminLoginComponent {
-  email = '';
-  password = '';
+  email = 'praneeth';
+  password = '17';
   error = '';
   loading = false;
 
