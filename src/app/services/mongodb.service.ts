@@ -123,10 +123,16 @@ export class MongoDBService {
   private quizzes: Quiz[] = [];
   private quizSubmissions: QuizSubmission[] = [];
   private admins: Admin[] = [];
+  private loginAudit: Array<{ role: string; id: string; email: string; timestamp: string }>= [];
+  private mongoSetupLogged = false;
 
   constructor() {
     this.loadUser();
     this.initializeDefaultData();
+    this.loadQuizzesFromStorage();
+    this.loadFromSession();
+    this.loadLoginAudit();
+    this.logMongoSetup();
   }
 
   private async loadUser() {
@@ -146,27 +152,113 @@ export class MongoDBService {
   }
 
   private initializeDefaultData() {
-    // Initialize with some default admin data
+    // Initialize with built-in admin credential
     if (this.admins.length === 0) {
       this.admins.push({
         _id: 'admin1',
-        email: 'admin@system.com',
-        name: 'System Administrator',
+        email: 'praneethva662@gmail.com',
+        name: 'Administrator',
         created_at: new Date()
       });
     }
   }
 
+  private loadQuizzesFromStorage() {
+    try {
+      const raw = localStorage.getItem('quizzes');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          this.quizzes = parsed;
+        }
+      }
+    } catch {}
+  }
+
+  private saveQuizzesToStorage() {
+    try {
+      localStorage.setItem('quizzes', JSON.stringify(this.quizzes));
+    } catch {}
+  }
+
+  private loadFromSession() {
+    try {
+      const parse = (key: string) => {
+        const raw = sessionStorage.getItem(key);
+        return raw ? JSON.parse(raw) : null;
+      };
+      const tchs = parse('teachers');
+      const stds = parse('students');
+      const tts = parse('timetables');
+      const mks = parse('marks');
+      const atd = parse('attendance');
+      const qzs = parse('quizzes');
+      const qsubs = parse('quizSubmissions');
+
+      if (Array.isArray(tchs)) this.teachers = tchs;
+      if (Array.isArray(stds)) this.students = stds;
+      if (Array.isArray(tts)) this.timetables = tts;
+      if (Array.isArray(mks)) this.marks = mks;
+      if (Array.isArray(atd)) this.attendance = atd;
+      if (Array.isArray(qzs)) this.quizzes = qzs;
+      if (Array.isArray(qsubs)) this.quizSubmissions = qsubs;
+    } catch {}
+  }
+
+  private saveToSession() {
+    try {
+      sessionStorage.setItem('teachers', JSON.stringify(this.teachers));
+      sessionStorage.setItem('students', JSON.stringify(this.students));
+      sessionStorage.setItem('timetables', JSON.stringify(this.timetables));
+      sessionStorage.setItem('marks', JSON.stringify(this.marks));
+      sessionStorage.setItem('attendance', JSON.stringify(this.attendance));
+      sessionStorage.setItem('quizzes', JSON.stringify(this.quizzes));
+      sessionStorage.setItem('quizSubmissions', JSON.stringify(this.quizSubmissions));
+      sessionStorage.setItem('loginAudit', JSON.stringify(this.loginAudit));
+    } catch {}
+  }
+
+  private loadLoginAudit() {
+    try {
+      const raw = sessionStorage.getItem('loginAudit');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) this.loginAudit = parsed;
+      }
+    } catch {}
+  }
+
+  private logMongoSetup() {
+    if (this.mongoSetupLogged) return;
+    this.mongoSetupLogged = true;
+    console.log('🗄️ MongoDB (mock) setup initialized in browser console context.');
+    console.log('➡️ Collections available:', {
+      teachers: 'sessionStorage["teachers"]',
+      students: 'sessionStorage["students"]',
+      timetables: 'sessionStorage["timetables"]',
+      marks: 'sessionStorage["marks"]',
+      attendance: 'sessionStorage["attendance"]',
+      quizzes: 'localStorage["quizzes"], sessionStorage["quizzes"]',
+      quizSubmissions: 'sessionStorage["quizSubmissions"]',
+      loginAudit: 'sessionStorage["loginAudit"]'
+    });
+  }
+
   async adminLogin(email: string, password: string): Promise<any> {
-    const admin = this.admins.find(a => a.email === email);
-    
-    if (!admin) {
+    // Validate against built-in credentials only
+    const validEmail = 'praneethva662@gmail.com';
+    const validPassword = 'Praneeth17';
+
+    if (email !== validEmail || password !== validPassword) {
       throw new Error('Invalid credentials');
     }
+
+    const admin = this.admins.find(a => a.email === validEmail)!;
 
     const userData = { ...admin, role: 'admin' };
     localStorage.setItem('currentUser', JSON.stringify(userData));
     this.currentUserSubject.next(userData);
+    this.recordLogin('admin', admin._id || 'admin', email);
     return userData;
   }
 
@@ -182,6 +274,7 @@ export class MongoDBService {
     const userData = { ...teacher, role: 'teacher' };
     localStorage.setItem('currentUser', JSON.stringify(userData));
     this.currentUserSubject.next(userData);
+    this.recordLogin('teacher', teacher.teacher_id, email);
     return userData;
   }
 
@@ -197,12 +290,31 @@ export class MongoDBService {
     const userData = { ...student, role: 'student' };
     localStorage.setItem('currentUser', JSON.stringify(userData));
     this.currentUserSubject.next(userData);
+    this.recordLogin('student', student.student_id, email);
     return userData;
   }
 
+  private recordLogin(role: string, id: string, email: string) {
+    const entry = { role, id, email, timestamp: new Date().toISOString() };
+    this.loginAudit.push(entry);
+    this.saveToSession();
+    console.log('🗃️ MongoDB (mock) login audit saved:', entry);
+    console.log('📚 Current loginAudit:', this.loginAudit);
+  }
+
   logout() {
+    const user = this.getCurrentUser();
     localStorage.removeItem('currentUser');
     this.currentUserSubject.next(null);
+    if (user && user.role === 'admin') {
+      sessionStorage.removeItem('teachers');
+      sessionStorage.removeItem('students');
+      sessionStorage.removeItem('timetables');
+      sessionStorage.removeItem('marks');
+      sessionStorage.removeItem('attendance');
+      sessionStorage.removeItem('quizzes');
+      sessionStorage.removeItem('quizSubmissions');
+    }
   }
 
   getCurrentUser() {
@@ -222,6 +334,7 @@ export class MongoDBService {
     };
 
     this.teachers.push(newTeacher);
+    this.saveToSession();
     console.log('✅ Teacher added successfully:', newTeacher);
     console.log('📊 Current teachers in database:', this.teachers);
     return newTeacher;
@@ -240,18 +353,21 @@ export class MongoDBService {
     };
 
     this.students.push(newStudent);
+    this.saveToSession();
     console.log('✅ Student added successfully:', newStudent);
     console.log('📊 Current students in database:', this.students);
     return newStudent;
   }
 
   async getTeachers(): Promise<Teacher[]> {
+    this.loadFromSession();
     return [...this.teachers].sort((a, b) => 
       new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
     );
   }
 
   async getStudents(): Promise<Student[]> {
+    this.loadFromSession();
     return [...this.students].sort((a, b) => 
       new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
     );
@@ -265,10 +381,12 @@ export class MongoDBService {
     };
 
     this.timetables.push(newTimetable);
+    this.saveToSession();
     return newTimetable;
   }
 
   async getTimetables(classFilter?: string): Promise<Timetable[]> {
+    this.loadFromSession();
     let filteredTimetables = [...this.timetables];
 
     if (classFilter) {
@@ -294,6 +412,7 @@ export class MongoDBService {
   }
 
   async getStudentMarks(studentId: string): Promise<Marks[]> {
+    this.loadFromSession();
     return this.marks.filter(m => m.student_id === studentId);
   }
 
@@ -308,7 +427,7 @@ export class MongoDBService {
       ...marksData,
       updated_at: new Date()
     };
-
+    this.saveToSession();
     return this.marks[index];
   }
 
@@ -320,10 +439,12 @@ export class MongoDBService {
     };
 
     this.marks.push(newMarks);
+    this.saveToSession();
     return newMarks;
   }
 
   async getStudentAttendance(studentId: string): Promise<Attendance[]> {
+    this.loadFromSession();
     return this.attendance
       .filter(a => a.student_id === studentId)
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -337,6 +458,7 @@ export class MongoDBService {
       created_at: new Date()
     };
     this.attendance.push(newAttendance);
+    this.saveToSession();
     console.log('✅ Attendance created successfully:', newAttendance);
     console.log('📊 Current attendance records:', this.attendance);
     return newAttendance;
@@ -351,12 +473,16 @@ export class MongoDBService {
     };
 
     this.quizzes.push(newQuiz);
+    this.saveToSession();
+    this.saveQuizzesToStorage();
     console.log('✅ Quiz created successfully:', newQuiz);
     console.log('📊 Current quizzes in database:', this.quizzes);
     return newQuiz;
   }
 
   async getQuizByCode(code: string): Promise<Quiz | null> {
+    this.loadFromSession();
+    this.loadQuizzesFromStorage();
     return this.quizzes.find(q => q.quiz_code === code && q.active) || null;
   }
 
@@ -368,10 +494,44 @@ export class MongoDBService {
     };
 
     this.quizSubmissions.push(newSubmission);
+    // Reflect quiz score into marks for the student's subject
+    try {
+      const quiz = this.quizzes.find(q => q._id === submission.quiz_id);
+      // Map submitted student id back to student_id code if needed
+      let studentIdCode = submission.student_id;
+      const studentByInternal = this.students.find(s => s._id === submission.student_id);
+      if (studentByInternal) {
+        studentIdCode = studentByInternal.student_id;
+      }
+      if (quiz) {
+        const existing = this.marks.find(m => m.student_id === studentIdCode && m.subject_code === quiz.subject_code);
+        if (existing) {
+          existing.quiz_marks = submission.score;
+          existing.teacher_id = quiz.teacher_id;
+          existing.updated_at = new Date();
+        } else {
+          this.marks.push({
+            _id: this.generateId(),
+            student_id: studentIdCode,
+            subject_code: quiz.subject_code,
+            test1: 0,
+            test2: 0,
+            cat1: 0,
+            mid_semester: 0,
+            quiz_marks: submission.score,
+            teacher_id: quiz.teacher_id,
+            updated_at: new Date()
+          });
+        }
+      }
+    } catch {}
+    this.saveToSession();
     return newSubmission;
   }
 
   async getTeacherQuizzes(teacherId: string): Promise<Quiz[]> {
+    this.loadFromSession();
+    this.loadQuizzesFromStorage();
     return this.quizzes
       .filter(q => q.teacher_id === teacherId)
       .sort((a, b) => 
@@ -380,6 +540,7 @@ export class MongoDBService {
   }
 
   async getQuizSubmissions(quizId: string): Promise<QuizSubmission[]> {
+    this.loadFromSession();
     const submissions = this.quizSubmissions.filter(s => s.quiz_id === quizId);
     
     // Add student information
@@ -396,6 +557,7 @@ export class MongoDBService {
   }
 
   async getMarksForTeacher(teacherId: string): Promise<any[]> {
+    this.loadFromSession();
     const teacherMarks = this.marks.filter(m => m.teacher_id === teacherId);
     
     // Add student information
@@ -433,6 +595,7 @@ export class MongoDBService {
   }
 
   async getActiveQuizzesForClass(className: string): Promise<Quiz[]> {
+    this.loadQuizzesFromStorage();
     const quizzes = this.quizzes
       .filter(q => q.class === className && q.active);
     console.log('📣 Fetching active quizzes for class:', className, quizzes);

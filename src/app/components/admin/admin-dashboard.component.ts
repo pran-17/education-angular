@@ -51,8 +51,11 @@ export class AdminDashboardComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    // Admin access does not require login
-    console.log('🛠️ Admin panel accessed without login');
+    const current = this.mongodb.getCurrentUser();
+    if (!current || current.role !== 'admin') {
+      this.router.navigate(['/admin-login']);
+      return;
+    }
     this.loadData();
   }
 

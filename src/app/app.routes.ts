@@ -17,7 +17,13 @@ export const routes: Routes = [
   },
   {
     path: 'admin',
-    loadComponent: () => import('./components/admin/admin-dashboard.component').then(m => m.AdminDashboardComponent)
+    loadComponent: () => import('./components/admin/admin-dashboard.component').then(m => m.AdminDashboardComponent),
+    canActivate: [authGuard],
+    data: { roles: ['admin'] }
+  },
+  {
+    path: 'admin-login',
+    loadComponent: () => import('./components/admin/admin-login.component').then(m => m.AdminLoginComponent)
   },
   {
     path: 'teacher',
