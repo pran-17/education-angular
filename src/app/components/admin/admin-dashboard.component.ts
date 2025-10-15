@@ -44,6 +44,13 @@ export class AdminDashboardComponent implements OnInit {
   loading = false;
   message = '';
   messageType: 'success' | 'error' = 'success';
+  currentDate = new Date();
+  
+  // Search and filter properties
+  teacherSearchTerm = '';
+  studentSearchTerm = '';
+  filteredTeachers: Teacher[] = [];
+  filteredStudents: Student[] = [];
 
   constructor(
     private mongodb: MongoDBService,
@@ -57,6 +64,8 @@ export class AdminDashboardComponent implements OnInit {
       return;
     }
     this.loadData();
+    this.filterTeachers();
+    this.filterStudents();
   }
 
   async loadData() {
@@ -67,6 +76,10 @@ export class AdminDashboardComponent implements OnInit {
       console.log('📥 Loaded students:', this.students);
       this.timetables = await this.mongodb.getTimetables();
       console.log('📥 Loaded timetables:', this.timetables);
+      
+      // Update filtered lists after loading data
+      this.filterTeachers();
+      this.filterStudents();
     } catch (error: any) {
       this.showMessage(error.message, 'error');
     }
@@ -86,6 +99,7 @@ export class AdminDashboardComponent implements OnInit {
       this.showMessage('Teacher added successfully!', 'success');
       this.resetTeacherForm();
       this.teachers = await this.mongodb.getTeachers();
+      this.filterTeachers(); // Update the filtered list
     } catch (error: any) {
       this.showMessage(error.message, 'error');
     } finally {
@@ -102,6 +116,7 @@ export class AdminDashboardComponent implements OnInit {
       this.showMessage('Student added successfully!', 'success');
       this.resetStudentForm();
       this.students = await this.mongodb.getStudents();
+      this.filterStudents(); // Update the filtered list
     } catch (error: any) {
       this.showMessage(error.message, 'error');
     } finally {
@@ -201,5 +216,126 @@ export class AdminDashboardComponent implements OnInit {
   logout() {
     this.mongodb.logout();
     this.router.navigate(['/home']);
+  }
+
+  getTotalClasses(): number {
+    const uniqueClasses = new Set(this.students.map(s => s.class));
+    return uniqueClasses.size;
+  }
+
+  async editTeacher(teacher: Teacher) {
+    const newName = prompt('Enter new name:', teacher.name);
+    const newEmail = prompt('Enter new email:', teacher.email);
+    const newSubject = prompt('Enter new subject:', teacher.subject);
+    
+    if (newName && newEmail && newSubject) {
+      this.loading = true;
+      try {
+        await this.mongodb.updateTeacher(teacher._id!, {
+          name: newName,
+          email: newEmail,
+          subject: newSubject
+        });
+        this.showMessage('Teacher updated successfully!', 'success');
+        this.teachers = await this.mongodb.getTeachers();
+        this.filterTeachers();
+      } catch (error: any) {
+        this.showMessage(error.message, 'error');
+      } finally {
+        this.loading = false;
+      }
+    }
+  }
+
+  async deleteTeacher(teacher: Teacher) {
+    if (confirm(`Are you sure you want to delete teacher ${teacher.name}?`)) {
+      this.loading = true;
+      try {
+        await this.mongodb.deleteTeacher(teacher._id!);
+        this.showMessage('Teacher deleted successfully!', 'success');
+        this.teachers = await this.mongodb.getTeachers();
+        this.filterTeachers();
+      } catch (error: any) {
+        this.showMessage(error.message, 'error');
+      } finally {
+        this.loading = false;
+      }
+    }
+  }
+
+  async editStudent(student: Student) {
+    const newName = prompt('Enter new name:', student.name);
+    const newEmail = prompt('Enter new email:', student.email);
+    const newClass = prompt('Enter new class:', student.class);
+    
+    if (newName && newEmail && newClass) {
+      this.loading = true;
+      try {
+        await this.mongodb.updateStudent(student._id!, {
+          name: newName,
+          email: newEmail,
+          class: newClass
+        });
+        this.showMessage('Student updated successfully!', 'success');
+        this.students = await this.mongodb.getStudents();
+        this.filterStudents();
+      } catch (error: any) {
+        this.showMessage(error.message, 'error');
+      } finally {
+        this.loading = false;
+      }
+    }
+  }
+
+  async deleteStudent(student: Student) {
+    if (confirm(`Are you sure you want to delete student ${student.name}?`)) {
+      this.loading = true;
+      try {
+        await this.mongodb.deleteStudent(student._id!);
+        this.showMessage('Student deleted successfully!', 'success');
+        this.students = await this.mongodb.getStudents();
+        this.filterStudents();
+      } catch (error: any) {
+        this.showMessage(error.message, 'error');
+      } finally {
+        this.loading = false;
+      }
+    }
+  }
+
+  filterTeachers() {
+    if (!this.teacherSearchTerm.trim()) {
+      this.filteredTeachers = [...this.teachers];
+    } else {
+      const searchTerm = this.teacherSearchTerm.toLowerCase();
+      this.filteredTeachers = this.teachers.filter(teacher =>
+        teacher.name.toLowerCase().includes(searchTerm) ||
+        teacher.email.toLowerCase().includes(searchTerm) ||
+        teacher.subject.toLowerCase().includes(searchTerm) ||
+        teacher.teacher_id.toLowerCase().includes(searchTerm)
+      );
+    }
+  }
+
+  filterStudents() {
+    if (!this.studentSearchTerm.trim()) {
+      this.filteredStudents = [...this.students];
+    } else {
+      const searchTerm = this.studentSearchTerm.toLowerCase();
+      this.filteredStudents = this.students.filter(student =>
+        student.name.toLowerCase().includes(searchTerm) ||
+        student.email.toLowerCase().includes(searchTerm) ||
+        student.class.toLowerCase().includes(searchTerm) ||
+        student.student_id.toLowerCase().includes(searchTerm)
+      );
+    }
+  }
+
+  onTeacherSearchChange() {
+    this.filterTeachers();
+  }
+
+  onStudentSearchChange() {
+    this.filterStudents();
   }
 }

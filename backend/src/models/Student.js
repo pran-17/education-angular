@@ -2,11 +2,11 @@ import mongoose from 'mongoose';
 
 const studentSchema = new mongoose.Schema(
   {
-    student_id: { type: String, required: true, index: true },
+    student_id: { type: String, required: true, unique: true },
     name: { type: String, required: true },
-    email: { type: String, required: true, unique: true, lowercase: true, index: true },
+    email: { type: String, required: true, unique: true, lowercase: true },
     passwordHash: { type: String, required: true },
-    rollNumber: { type: String, index: true },
+    rollNumber: { type: String },
     className: { type: String },
     section: { type: String },
     phone: { type: String },
@@ -17,9 +17,7 @@ const studentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-studentSchema.index({ email: 1 }, { unique: true });
-studentSchema.index({ rollNumber: 1 }, { unique: false });
-studentSchema.index({ student_id: 1 }, { unique: false });
+// Indexes are already defined in the schema above
 
 export default mongoose.model('Student', studentSchema);
 

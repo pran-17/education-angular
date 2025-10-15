@@ -5,7 +5,12 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "backend": "cd backend && npm install && npm start"
+    "build:prod": "ng build demo --configuration production",
+    "backend": "cd backend && npm install && npm start",
+    "deploy:docker": "docker-compose up -d",
+    "deploy:build": "npm run build:prod && docker-compose up -d --build",
+    "deploy:vercel": "npm run build:prod && vercel --prod",
+    "deploy:netlify": "npm run build:prod && netlify deploy --prod --dir=dist/demo/browser"
   },
   "dependencies": {
     "@angular/animations": "^20.0.0",

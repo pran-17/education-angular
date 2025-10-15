@@ -103,4 +103,18 @@ export class StudentDashboardComponent implements OnInit {
     this.mongodb.logout();
     this.router.navigate(['/home']);
   }
+
+  getOverallAttendanceRate(): number {
+    if (this.attendance.length === 0) return 0;
+    const presentCount = this.attendance.filter(a => a.status === 'Present').length;
+    return Math.round((presentCount / this.attendance.length) * 100);
+  }
+
+  getGrade(totalMarks: number): string {
+    if (totalMarks >= 90) return 'A';
+    if (totalMarks >= 80) return 'B';
+    if (totalMarks >= 70) return 'C';
+    if (totalMarks >= 60) return 'D';
+    return 'F';
+  }
 }

@@ -1,64 +1,161 @@
 <div class="quiz-container">
-  <div class="quiz-card" *ngIf="!loading && !error && !submitted && quiz">
-    <div class="quiz-header">
-      <h1>{{ quiz.subject_code }} - Quiz</h1>
-      <div class="quiz-meta">
-        <span>Class: {{ quiz.class }}</span>
-        <span>Questions: {{ quiz.questions.length }}</span>
+  <!-- Header -->
+  <header class="navbar">
+    <div class="container d-flex justify-between items-center">
+      <div class="d-flex items-center gap-4">
+        <button (click)="goHome()" class="btn btn-secondary btn-sm">
+          <span>←</span> Home
+        </button>
+        <div>
+          <h1 class="navbar-brand mb-0">Quiz: {{ quiz?.subject_code }}</h1>
+          <p class="text-sm text-secondary-600">Class: {{ quiz?.class }}</p>
+        </div>
+      </div>
+      <div class="d-flex items-center gap-3">
+        <div class="text-right">
+          <p class="text-sm font-medium">{{ currentUser?.name }}</p>
+          <p class="text-xs text-secondary-500">ID: {{ currentUser?.student_id }}</p>
+        </div>
       </div>
     </div>
+  </header>
 
-    <div class="questions-section">
-      <div *ngFor="let question of quiz.questions; let i = index" class="question-card">
-        <div class="question-number">Question {{ i + 1 }}</div>
-        <h3 class="question-text">{{ question.question }}</h3>
+  <!-- Loading State -->
+  <div *ngIf="loading && !quiz" class="container mt-8">
+    <div class="card text-center">
+      <div class="card-body">
+        <div class="spinner mb-4"></div>
+        <h3>Loading Quiz...</h3>
+        <p class="text-secondary-600">Please wait while we load your quiz</p>
+      </div>
+    </div>
+  </div>
 
-        <div class="options">
-          <div
-            *ngFor="let option of question.options; let j = index"
-            class="option"
-            [class.selected]="answers[i] === j"
-            (click)="selectAnswer(i, j)">
-            <div class="option-radio">
-              <div class="radio-dot" *ngIf="answers[i] === j"></div>
-            </div>
-            <span class="option-text">{{ option }}</span>
-          </div>
+  <!-- Quiz Not Found -->
+  <div *ngIf="!loading && !quiz" class="container mt-8">
+    <div class="card text-center">
+      <div class="card-body">
+        <div class="text-4xl mb-4">❌</div>
+        <h3>Quiz Not Found</h3>
+        <p class="text-secondary-600">The quiz you're looking for doesn't exist or is no longer active.</p>
+        <button (click)="goHome()" class="btn btn-primary mt-4">Go Home</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quiz Content -->
+  <div *ngIf="quiz && !submitted" class="container mt-6">
+    <!-- Progress Bar -->
+    <div class="card mb-6">
+      <div class="card-body">
+        <div class="d-flex justify-between items-center mb-2">
+          <span class="text-sm font-medium">Question {{ currentQuestionIndex + 1 }} of {{ quiz.questions.length }}</span>
+          <span class="text-sm text-secondary-600">{{ getProgress().toFixed(0) }}% Complete</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="getProgress()"></div>
         </div>
       </div>
     </div>
 
-    <div class="quiz-footer">
-      <button (click)="submitQuiz()" class="submit-btn" [disabled]="loading">
-        {{ loading ? 'Submitting...' : 'Submit Quiz' }}
-      </button>
+    <!-- Question Card -->
+    <div class="card">
+      <div class="card-body">
+        <h2 class="card-title mb-6">{{ getCurrentQuestion()?.question }}</h2>
+        
+        <div class="options-container">
+          <div 
+            *ngFor="let option of getCurrentQuestion()?.options; let i = index" 
+            class="option-item"
+            [class.selected]="answers[currentQuestionIndex] === i"
+            (click)="selectAnswer(currentQuestionIndex, i)">
+            <div class="option-number">{{ getOptionLetter(i) }}</div>
+            <div class="option-text">{{ option }}</div>
+          </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="d-flex justify-between items-center mt-8">
+          <button 
+            (click)="previousQuestion()" 
+            class="btn btn-secondary"
+            [disabled]="isFirstQuestion()">
+            ← Previous
+          </button>
+          
+          <div class="d-flex gap-2">
+            <button 
+              *ngFor="let question of quiz.questions; let i = index"
+              (click)="currentQuestionIndex = i"
+              class="btn btn-sm"
+              [class]="answers[i] !== undefined ? 'btn-primary' : 'btn-secondary'"
+              [class.btn-success]="answers[i] !== undefined">
+              {{ i + 1 }}
+            </button>
+          </div>
+
+          <button 
+            *ngIf="!isLastQuestion()"
+            (click)="nextQuestion()" 
+            class="btn btn-primary">
+            Next →
+          </button>
+          
+          <button 
+            *ngIf="isLastQuestion()"
+            (click)="submitQuiz()" 
+            class="btn btn-success"
+            [disabled]="loading">
+            <span *ngIf="loading" class="spinner"></span>
+            {{ loading ? 'Submitting...' : 'Submit Quiz' }}
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="result-card" *ngIf="submitted">
-    <div class="success-icon">✓</div>
-    <h2>Quiz Submitted Successfully!</h2>
-    <div class="score-display">
-      <div class="score-value">{{ score }}%</div>
-      <div class="score-label">Your Score</div>
+  <!-- Quiz Results -->
+  <div *ngIf="submitted" class="container mt-8">
+    <div class="card text-center">
+      <div class="card-body">
+        <div class="text-6xl mb-4">
+          <span *ngIf="score >= 80">🎉</span>
+          <span *ngIf="score >= 60 && score < 80">👍</span>
+          <span *ngIf="score < 60">📚</span>
+        </div>
+        
+        <h2 class="text-3xl font-bold mb-2">Quiz Completed!</h2>
+        <p class="text-lg text-secondary-600 mb-6">Your score: <span class="font-bold text-primary-600">{{ score }}%</span></p>
+        
+        <div class="score-breakdown mb-6">
+          <div class="d-flex justify-center gap-8">
+            <div class="text-center">
+              <div class="text-2xl font-bold text-success-600">{{ score >= 80 ? 'Excellent' : score >= 60 ? 'Good' : 'Keep Learning' }}</div>
+              <div class="text-sm text-secondary-600">Performance</div>
+            </div>
+            <div class="text-center">
+              <div class="text-2xl font-bold text-primary-600">{{ quiz?.questions?.length || 0 }}</div>
+              <div class="text-sm text-secondary-600">Total Questions</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex justify-center gap-4">
+          <button (click)="goHome()" class="btn btn-primary">Go to Dashboard</button>
+          <button (click)="goHome()" class="btn btn-secondary">Take Another Quiz</button>
+        </div>
+      </div>
     </div>
-    <p class="success-message">{{ message }}</p>
-    <button (click)="goToDashboard()" class="dashboard-btn">
-      Go to Dashboard
-    </button>
   </div>
 
-  <div class="error-card" *ngIf="error">
-    <div class="error-icon">✕</div>
-    <h2>Unable to Load Quiz</h2>
-    <p class="error-message">{{ error }}</p>
-    <button (click)="goToDashboard()" class="dashboard-btn">
-      Go to Dashboard
-    </button>
-  </div>
-
-  <div class="loading-overlay" *ngIf="loading && !quiz">
-    <div class="spinner"></div>
-    <p>Loading quiz...</p>
+  <!-- Alert Messages -->
+  <div *ngIf="message" class="container mt-4">
+    <div class="alert" [class.alert-success]="messageType === 'success'" [class.alert-error]="messageType === 'error'">
+      <div class="d-flex items-center gap-2">
+        <span *ngIf="messageType === 'success'">✅</span>
+        <span *ngIf="messageType === 'error'">❌</span>
+        {{ message }}
+      </div>
+    </div>
   </div>
 </div>

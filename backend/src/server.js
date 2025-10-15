@@ -5,6 +5,8 @@ import dotenv from 'dotenv';
 
 import teachersRouter from './routes/teachers.js';
 import studentsRouter from './routes/students.js';
+import quizzesRouter from './routes/quizzes.js';
+import quizSubmissionsRouter from './routes/quiz-submissions.js';
 
 dotenv.config();
 
@@ -32,6 +34,8 @@ app.get('/api/health', (req, res) => {
 
 app.use('/api/teachers', teachersRouter);
 app.use('/api/students', studentsRouter);
+app.use('/api/quizzes', quizzesRouter);
+app.use('/api/quiz-submissions', quizSubmissionsRouter);
 
 const port = process.env.PORT || 4000;
 app.listen(port, () => {

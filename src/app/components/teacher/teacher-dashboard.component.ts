@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MongoDBService, Marks, Quiz, Attendance } from '../../services/mongodb.service';
-import * as QRCode from 'qrcode';
+import QRCode from 'qrcode';
 
 @Component({
   selector: 'app-teacher-dashboard',
@@ -233,5 +233,14 @@ export class TeacherDashboardComponent implements OnInit {
   logout() {
     this.mongodb.logout();
     this.router.navigate(['/home']);
+  }
+
+  getTotalMarks(mark: any): number {
+    return (mark.test1 || 0) + (mark.test2 || 0) + (mark.cat1 || 0) + 
+           (mark.mid_semester || 0) + (mark.quiz_marks || 0);
+  }
+
+  getActiveQuizzesCount(): number {
+    return this.quizzes.filter(q => q.active).length;
   }
 }

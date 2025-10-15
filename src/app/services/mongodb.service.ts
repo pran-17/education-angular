@@ -332,6 +332,24 @@ export class MongoDBService {
     return items || [];
   }
 
+  async updateTeacher(id: string, teacher: Partial<Teacher>): Promise<any> {
+    const payload = { ...teacher, password: teacher.password } as any;
+    return await this.http.put(`${this.apiBase}/teachers/${id}`, payload).toPromise();
+  }
+
+  async deleteTeacher(id: string): Promise<any> {
+    return await this.http.delete(`${this.apiBase}/teachers/${id}`).toPromise();
+  }
+
+  async updateStudent(id: string, student: Partial<Student>): Promise<any> {
+    const payload = { ...student, password: student.password } as any;
+    return await this.http.put(`${this.apiBase}/students/${id}`, payload).toPromise();
+  }
+
+  async deleteStudent(id: string): Promise<any> {
+    return await this.http.delete(`${this.apiBase}/students/${id}`).toPromise();
+  }
+
   async addTimetable(timetable: Timetable): Promise<any> {
     const newTimetable: Timetable = {
       ...timetable,
@@ -424,78 +442,42 @@ export class MongoDBService {
   }
 
   async createQuiz(quiz: Quiz): Promise<any> {
-    console.log('📝 Creating new quiz:', quiz);
-    const newQuiz: Quiz = {
-      ...quiz,
-      _id: this.generateId(),
-      created_at: new Date()
-    };
+    const payload = { ...quiz } as any;
+    const created = await this.http.post(`${this.apiBase}/quizzes`, payload).toPromise();
+    return created as any;
+  }
 
-    this.quizzes.push(newQuiz);
-    this.saveToSession();
-    this.saveQuizzesToStorage();
-    console.log('✅ Quiz created successfully:', newQuiz);
-    console.log('📊 Current quizzes in database:', this.quizzes);
-    return newQuiz;
+  async getQuizzes(): Promise<Quiz[]> {
+    const items = await this.http.get<Quiz[]>(`${this.apiBase}/quizzes`).toPromise();
+    return items || [];
   }
 
   async getQuizByCode(code: string): Promise<Quiz | null> {
-    this.loadFromSession();
-    this.loadQuizzesFromStorage();
-    return this.quizzes.find(q => q.quiz_code === code && q.active) || null;
+    try {
+      const quiz = await this.http.get<Quiz>(`${this.apiBase}/quizzes/code/${code}`).toPromise();
+      return quiz || null;
+    } catch (error) {
+      return null;
+    }
   }
 
   async submitQuiz(submission: QuizSubmission): Promise<any> {
-    const newSubmission: QuizSubmission = {
-      ...submission,
-      _id: this.generateId(),
-      submitted_at: new Date()
-    };
-
-    this.quizSubmissions.push(newSubmission);
-    // Reflect quiz score into marks for the student's subject
-    try {
-      const quiz = this.quizzes.find(q => q._id === submission.quiz_id);
-      // Map submitted student id back to student_id code if needed
-      let studentIdCode = submission.student_id;
-      const studentByInternal = this.students.find(s => s._id === submission.student_id);
-      if (studentByInternal) {
-        studentIdCode = studentByInternal.student_id;
-      }
-      if (quiz) {
-        const existing = this.marks.find(m => m.student_id === studentIdCode && m.subject_code === quiz.subject_code);
-        if (existing) {
-          existing.quiz_marks = submission.score;
-          existing.teacher_id = quiz.teacher_id;
-          existing.updated_at = new Date();
-        } else {
-          this.marks.push({
-            _id: this.generateId(),
-            student_id: studentIdCode,
-            subject_code: quiz.subject_code,
-            test1: 0,
-            test2: 0,
-            cat1: 0,
-            mid_semester: 0,
-            quiz_marks: submission.score,
-            teacher_id: quiz.teacher_id,
-            updated_at: new Date()
-          });
-        }
-      }
-    } catch {}
-    this.saveToSession();
-    return newSubmission;
+    const payload = { ...submission } as any;
+    return await this.http.post(`${this.apiBase}/quiz-submissions`, payload).toPromise();
   }
 
+
+
   async getTeacherQuizzes(teacherId: string): Promise<Quiz[]> {
-    this.loadFromSession();
-    this.loadQuizzesFromStorage();
-    return this.quizzes
-      .filter(q => q.teacher_id === teacherId)
-      .sort((a, b) => 
+    try {
+      const quizzes = await this.http.get<Quiz[]>(`${this.apiBase}/quizzes/teacher/${teacherId}`).toPromise();
+      return (quizzes || []).sort((a, b) => 
         new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
       );
+    } catch (error) {
+      console.error('Error fetching teacher quizzes:', error);
+      return [];
+    }
   }
 
   async getQuizSubmissions(quizId: string): Promise<QuizSubmission[]> {
@@ -554,11 +536,14 @@ export class MongoDBService {
   }
 
   async getActiveQuizzesForClass(className: string): Promise<Quiz[]> {
-    this.loadQuizzesFromStorage();
-    const quizzes = this.quizzes
-      .filter(q => q.class === className && q.active);
-    console.log('📣 Fetching active quizzes for class:', className, quizzes);
-    return quizzes.sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
+    try {
+      const quizzes = await this.http.get<Quiz[]>(`${this.apiBase}/quizzes/class/${className}`).toPromise();
+      console.log('📣 Fetching active quizzes for class:', className, quizzes);
+      return (quizzes || []).sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
+    } catch (error) {
+      console.error('Error fetching quizzes for class:', error);
+      return [];
+    }
   }
 
   private generateId(): string {

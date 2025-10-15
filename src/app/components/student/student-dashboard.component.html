@@ -1,212 +1,373 @@
 <div class="student-container">
-  <header class="student-header">
-    <div>
-      <button (click)="goHome()" class="home-btn">← Home</button>
-      <h1>Student Dashboard</h1>
-      <p class="student-info">Welcome, {{ currentUser?.name }}</p>
+  <!-- Header Section -->
+  <header class="navbar">
+    <div class="container d-flex justify-between items-center">
+      <div class="d-flex items-center gap-4">
+        <button (click)="goHome()" class="btn btn-secondary btn-sm">
+          <span>←</span> Home
+        </button>
+        <div>
+          <h1 class="navbar-brand mb-0">Student Dashboard</h1>
+          <p class="text-sm text-secondary-600">Welcome, {{ currentUser?.name }}</p>
+        </div>
+      </div>
+      <div class="d-flex items-center gap-3">
+        <div class="text-right">
+          <p class="text-sm font-medium">{{ currentUser?.class }} Student</p>
+          <p class="text-xs text-secondary-500">ID: {{ currentUser?.student_id }}</p>
+        </div>
+        <button (click)="logout()" class="btn btn-danger btn-sm">
+          <span>🚪</span> Logout
+        </button>
+      </div>
     </div>
-    <button (click)="logout()" class="logout-btn">Logout</button>
   </header>
 
-  <div class="tabs">
-    <button [class.active]="activeTab === 'profile'" (click)="setActiveTab('profile')" class="tab-btn">
-      Profile
-    </button>
-    <button [class.active]="activeTab === 'marks'" (click)="setActiveTab('marks')" class="tab-btn">
-      My Marks
-    </button>
-    <button [class.active]="activeTab === 'attendance'" (click)="setActiveTab('attendance')" class="tab-btn">
-      Attendance
-    </button>
-    <button [class.active]="activeTab === 'quizzes'" (click)="setActiveTab('quizzes')" class="tab-btn">
-      Quizzes
-    </button>
-  </div>
-
-  <div class="content">
-    <div *ngIf="activeTab === 'profile'" class="tab-content">
-      <div class="profile-card">
-        <h2>Your Profile</h2>
-        <div class="profile-info">
-          <div class="info-item">
-            <span class="label">Name:</span>
-            <span class="value">{{ currentUser?.name }}</span>
-          </div>
-          <div class="info-item">
-            <span class="label">Student ID:</span>
-            <span class="value">{{ currentUser?.student_id }}</span>
-          </div>
-          <div class="info-item">
-            <span class="label">Email:</span>
-            <span class="value">{{ currentUser?.email }}</span>
-          </div>
-          <div class="info-item">
-            <span class="label">Class:</span>
-            <span class="value">{{ currentUser?.class }}</span>
+  <!-- Stats Overview -->
+  <div class="container mt-6">
+    <div class="row mb-8">
+      <div class="col-3">
+        <div class="card text-center">
+          <div class="card-body">
+            <div class="text-3xl font-bold text-primary-600 mb-2">📚</div>
+            <h3 class="text-2xl font-bold text-secondary-900">{{ marks.length }}</h3>
+            <p class="text-secondary-600">Subjects Enrolled</p>
           </div>
         </div>
       </div>
-
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-value">{{ marks.length }}</div>
-          <div class="stat-label">Subjects Enrolled</div>
+      <div class="col-3">
+        <div class="card text-center">
+          <div class="card-body">
+            <div class="text-3xl font-bold text-success-600 mb-2">✅</div>
+            <h3 class="text-2xl font-bold text-secondary-900">{{ getPresentCount() }}</h3>
+            <p class="text-secondary-600">Classes Attended</p>
+          </div>
         </div>
-        <div class="stat-card">
-          <div class="stat-value">{{ getPresentCount() }}</div>
-          <div class="stat-label">Classes Attended</div>
+      </div>
+      <div class="col-3">
+        <div class="card text-center">
+          <div class="card-body">
+            <div class="text-3xl font-bold text-warning-600 mb-2">📊</div>
+            <h3 class="text-2xl font-bold text-secondary-900">{{ getTotalMarksSum() }}</h3>
+            <p class="text-secondary-600">Total Marks</p>
+          </div>
         </div>
-        <div class="stat-card">
-          <div class="stat-value">{{ getTotalMarksSum() }}</div>
-          <div class="stat-label">Total Marks</div>
+      </div>
+      <div class="col-3">
+        <div class="card text-center">
+          <div class="card-body">
+            <div class="text-3xl font-bold text-primary-600 mb-2">📝</div>
+            <h3 class="text-2xl font-bold text-secondary-900">{{ quizzes.length }}</h3>
+            <p class="text-secondary-600">Available Quizzes</p>
+          </div>
         </div>
       </div>
     </div>
 
-    <div *ngIf="activeTab === 'marks'" class="tab-content">
-      <div class="marks-section">
-        <h2>My Marks</h2>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Subject Code</th>
-                <th>Test 1</th>
-                <th>Test 2</th>
-                <th>CAT 1</th>
-                <th>Mid-Semester</th>
-                <th>Quiz Marks</th>
-                <th>Total</th>
-                <th>Attendance</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let mark of marks">
-                <td><strong>{{ mark.subject_code }}</strong></td>
-                <td>{{ mark.test1 || 0 }}</td>
-                <td>{{ mark.test2 || 0 }}</td>
-                <td>{{ mark.cat1 || 0 }}</td>
-                <td>{{ mark.mid_semester || 0 }}</td>
-                <td>{{ mark.quiz_marks || 0 }}</td>
-                <td><strong>{{ getTotalMarks(mark) }}</strong></td>
-                <td>
-                  <span class="attendance-badge" [class.good]="getAttendancePercentage(mark.subject_code) >= 75"
-                        [class.warning]="getAttendancePercentage(mark.subject_code) >= 50 && getAttendancePercentage(mark.subject_code) < 75"
-                        [class.danger]="getAttendancePercentage(mark.subject_code) < 50">
-                    {{ getAttendancePercentage(mark.subject_code) }}%
-                  </span>
-                </td>
-              </tr>
-              <tr *ngIf="marks.length === 0">
-                <td colspan="8" class="empty">No marks data available</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+    <!-- Navigation Tabs -->
+    <div class="tab-nav">
+      <button [class.active]="activeTab === 'profile'" (click)="setActiveTab('profile')" class="tab-item">
+        <span>👤</span> Profile
+      </button>
+      <button [class.active]="activeTab === 'marks'" (click)="setActiveTab('marks')" class="tab-item">
+        <span>📊</span> My Marks
+      </button>
+      <button [class.active]="activeTab === 'attendance'" (click)="setActiveTab('attendance')" class="tab-item">
+        <span>📋</span> Attendance
+      </button>
+      <button [class.active]="activeTab === 'quizzes'" (click)="setActiveTab('quizzes')" class="tab-item">
+        <span>📝</span> Quizzes
+      </button>
     </div>
 
-    <div *ngIf="activeTab === 'attendance'" class="tab-content">
-      <div class="attendance-section">
-        <h2>Attendance Records</h2>
-
-        <div class="attendance-summary">
-          <h3>Summary by Subject</h3>
-          <div class="summary-grid">
-            <div *ngFor="let subject of getAttendanceBySubject() | keyvalue" class="summary-card">
-              <div class="subject-name">{{ subject.key }}</div>
-              <div class="attendance-stats">
-                <div class="stat">
-                  <span class="count">{{ getSubjectPresentCount(subject.value) }}</span>
-                  <span class="text">Present</span>
-                </div>
-                <div class="stat">
-                  <span class="count">{{ getSubjectAbsentCount(subject.value) }}</span>
-                  <span class="text">Absent</span>
-                </div>
-                <div class="stat">
-                  <span class="count">{{ subject.value.length }}</span>
-                  <span class="text">Total</span>
+    <!-- Tab Content -->
+    <div class="content">
+      <!-- Profile Tab -->
+      <div *ngIf="activeTab === 'profile'" class="tab-content">
+        <div class="row">
+          <div class="col-6">
+            <div class="card">
+              <div class="card-header">
+                <h2 class="card-title">Your Profile</h2>
+                <p class="card-subtitle">Personal information and academic details</p>
+              </div>
+              <div class="card-body">
+                <div class="d-flex flex-column gap-4">
+                  <div class="d-flex items-center gap-4">
+                    <div class="avatar text-2xl">👨‍🎓</div>
+                    <div>
+                      <h3 class="text-xl font-bold">{{ currentUser?.name }}</h3>
+                      <p class="text-secondary-600">{{ currentUser?.class }} Student</p>
+                    </div>
+                  </div>
+                  <div class="d-flex flex-column gap-3">
+                    <div class="d-flex justify-between items-center p-3 rounded-lg" style="background: var(--primary-50);">
+                      <span class="font-medium">Student ID:</span>
+                      <span class="badge badge-primary">{{ currentUser?.student_id }}</span>
+                    </div>
+                    <div class="d-flex justify-between items-center p-3 rounded-lg" style="background: var(--secondary-50);">
+                      <span class="font-medium">Email:</span>
+                      <span>{{ currentUser?.email }}</span>
+                    </div>
+                    <div class="d-flex justify-between items-center p-3 rounded-lg" style="background: var(--success-50);">
+                      <span class="font-medium">Class:</span>
+                      <span class="badge badge-success">{{ currentUser?.class }}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div class="percentage" [class.good]="getAttendancePercentage(subject.key) >= 75"
-                   [class.warning]="getAttendancePercentage(subject.key) >= 50 && getAttendancePercentage(subject.key) < 75"
-                   [class.danger]="getAttendancePercentage(subject.key) < 50">
-                {{ getAttendancePercentage(subject.key) }}% Attendance
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="card">
+              <div class="card-header">
+                <h2 class="card-title">Academic Overview</h2>
+                <p class="card-subtitle">Your academic performance summary</p>
+              </div>
+              <div class="card-body">
+                <div class="d-flex flex-column gap-4">
+                  <div class="d-flex justify-between items-center">
+                    <span>Subjects Enrolled:</span>
+                    <span class="font-bold text-primary-600">{{ marks.length }}</span>
+                  </div>
+                  <div class="d-flex justify-between items-center">
+                    <span>Classes Attended:</span>
+                    <span class="font-bold text-success-600">{{ getPresentCount() }}</span>
+                  </div>
+                  <div class="d-flex justify-between items-center">
+                    <span>Total Classes:</span>
+                    <span class="font-bold text-secondary-600">{{ attendance.length }}</span>
+                  </div>
+                  <div class="d-flex justify-between items-center">
+                    <span>Attendance Rate:</span>
+                    <span class="font-bold" [class]="getOverallAttendanceRate() >= 75 ? 'text-success-600' : getOverallAttendanceRate() >= 50 ? 'text-warning-600' : 'text-error-600'">
+                      {{ getOverallAttendanceRate() }}%
+                    </span>
+                  </div>
+                  <div class="d-flex justify-between items-center">
+                    <span>Available Quizzes:</span>
+                    <span class="font-bold text-warning-600">{{ quizzes.length }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Marks Tab -->
+      <div *ngIf="activeTab === 'marks'" class="tab-content">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">My Marks</h2>
+            <p class="card-subtitle">Academic performance across all subjects</p>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-container">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Subject</th>
+                    <th>Test 1</th>
+                    <th>Test 2</th>
+                    <th>CAT 1</th>
+                    <th>Mid-Semester</th>
+                    <th>Quiz</th>
+                    <th>Total</th>
+                    <th>Attendance</th>
+                    <th>Grade</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let mark of marks">
+                    <td>
+                      <div class="d-flex items-center gap-2">
+                        <div class="avatar">📚</div>
+                        <span class="font-medium">{{ mark.subject_code }}</span>
+                      </div>
+                    </td>
+                    <td><span class="font-medium">{{ mark.test1 || 0 }}</span></td>
+                    <td><span class="font-medium">{{ mark.test2 || 0 }}</span></td>
+                    <td><span class="font-medium">{{ mark.cat1 || 0 }}</span></td>
+                    <td><span class="font-medium">{{ mark.mid_semester || 0 }}</span></td>
+                    <td><span class="font-medium text-success-600">{{ mark.quiz_marks || 0 }}</span></td>
+                    <td><span class="font-bold text-primary-600">{{ getTotalMarks(mark) }}</span></td>
+                    <td>
+                      <span class="badge" [class]="getAttendancePercentage(mark.subject_code) >= 75 ? 'badge-success' : getAttendancePercentage(mark.subject_code) >= 50 ? 'badge-warning' : 'badge-danger'">
+                        {{ getAttendancePercentage(mark.subject_code) }}%
+                      </span>
+                    </td>
+                    <td>
+                      <span class="badge" [class]="getGrade(getTotalMarks(mark)) === 'A' ? 'badge-success' : getGrade(getTotalMarks(mark)) === 'B' ? 'badge-primary' : getGrade(getTotalMarks(mark)) === 'C' ? 'badge-warning' : 'badge-danger'">
+                        {{ getGrade(getTotalMarks(mark)) }}
+                      </span>
+                    </td>
+                  </tr>
+                  <tr *ngIf="marks.length === 0">
+                    <td colspan="9" class="text-center p-8">
+                      <div class="text-secondary-500">
+                        <div class="text-4xl mb-2">📊</div>
+                        <p>No marks data available</p>
+                        <p class="text-sm">Your marks will appear here once teachers update them</p>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Attendance Tab -->
+      <div *ngIf="activeTab === 'attendance'" class="tab-content">
+        <!-- Attendance Summary -->
+        <div class="row mb-6">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h2 class="card-title">Attendance Summary</h2>
+                <p class="card-subtitle">Overview by subject</p>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div *ngFor="let subject of getAttendanceBySubject() | keyvalue" class="col-3">
+                    <div class="card text-center" style="background: var(--secondary-50);">
+                      <div class="card-body">
+                        <h3 class="text-lg font-bold mb-2">{{ subject.key }}</h3>
+                        <div class="d-flex justify-between items-center mb-2">
+                          <span class="text-sm">Present:</span>
+                          <span class="font-bold text-success-600">{{ getSubjectPresentCount(subject.value) }}</span>
+                        </div>
+                        <div class="d-flex justify-between items-center mb-2">
+                          <span class="text-sm">Absent:</span>
+                          <span class="font-bold text-error-600">{{ getSubjectAbsentCount(subject.value) }}</span>
+                        </div>
+                        <div class="d-flex justify-between items-center mb-3">
+                          <span class="text-sm">Total:</span>
+                          <span class="font-bold">{{ subject.value.length }}</span>
+                        </div>
+                        <div class="badge" [class]="getAttendancePercentage(subject.key) >= 75 ? 'badge-success' : getAttendancePercentage(subject.key) >= 50 ? 'badge-warning' : 'badge-danger'">
+                          {{ getAttendancePercentage(subject.key) }}% Attendance
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="attendance-details">
-          <h3>Detailed Records</h3>
-          <div class="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Subject Code</th>
-                  <th>Status</th>
-                  <th>Marked Via</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let att of attendance">
-                  <td>{{ att.date | date:'mediumDate' }}</td>
-                  <td>{{ att.subject_code }}</td>
-                  <td>
-                    <span class="status-badge" [class.present]="att.status === 'Present'" [class.absent]="att.status === 'Absent'">
-                      {{ att.status }}
-                    </span>
-                  </td>
-                  <td>{{ att.marked_via || 'N/A' }}</td>
-                </tr>
-                <tr *ngIf="attendance.length === 0">
-                  <td colspan="4" class="empty">No attendance records available</td>
-                </tr>
-              </tbody>
-            </table>
+        <!-- Detailed Records -->
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Detailed Attendance Records</h2>
+            <p class="card-subtitle">Complete attendance history</p>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-container">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Subject</th>
+                    <th>Status</th>
+                    <th>Marked Via</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let att of attendance">
+                    <td>{{ att.date | date:'MMM dd, yyyy' }}</td>
+                    <td>
+                      <span class="badge badge-secondary">{{ att.subject_code }}</span>
+                    </td>
+                    <td>
+                      <span class="badge" [class]="att.status === 'Present' ? 'badge-success' : 'badge-danger'">
+                        {{ att.status }}
+                      </span>
+                    </td>
+                    <td>{{ att.marked_via || 'Manual' }}</td>
+                  </tr>
+                  <tr *ngIf="attendance.length === 0">
+                    <td colspan="4" class="text-center p-8">
+                      <div class="text-secondary-500">
+                        <div class="text-4xl mb-2">📋</div>
+                        <p>No attendance records available</p>
+                        <p class="text-sm">Attendance will be recorded when you attend classes</p>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div *ngIf="activeTab === 'quizzes'" class="tab-content">
-      <div class="quiz-section">
-        <h2>Available Quizzes</h2>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Subject Code</th>
-                <th>Class</th>
-                <th>Code</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let quiz of quizzes">
-                <td>{{ quiz.subject_code }}</td>
-                <td>{{ quiz.class }}</td>
-                <td><code>{{ quiz.quiz_code }}</code></td>
-                <td>
-                  <span [class.active]="quiz.active" [class.inactive]="!quiz.active">{{ quiz.active ? 'Active' : 'Closed' }}</span>
-                </td>
-                <td>
-                  <a [href]="'/quiz/' + quiz.quiz_code" class="take-quiz-btn">Take Quiz</a>
-                </td>
-              </tr>
-              <tr *ngIf="quizzes.length === 0">
-                <td colspan="5" class="empty">No active quizzes for your class</td>
-              </tr>
-            </tbody>
-          </table>
+      <!-- Quizzes Tab -->
+      <div *ngIf="activeTab === 'quizzes'" class="tab-content">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Available Quizzes</h2>
+            <p class="card-subtitle">Take quizzes for your subjects</p>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-container">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Subject</th>
+                    <th>Class</th>
+                    <th>Quiz Code</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let quiz of quizzes">
+                    <td>
+                      <div class="d-flex items-center gap-2">
+                        <div class="avatar">📝</div>
+                        <span class="font-medium">{{ quiz.subject_code }}</span>
+                      </div>
+                    </td>
+                    <td><span class="badge badge-warning">{{ quiz.class }}</span></td>
+                    <td>
+                      <code class="badge badge-secondary">{{ quiz.quiz_code }}</code>
+                    </td>
+                    <td>
+                      <span class="badge" [class]="quiz.active ? 'badge-success' : 'badge-secondary'">
+                        {{ quiz.active ? 'Active' : 'Closed' }}
+                      </span>
+                    </td>
+                    <td>{{ quiz.created_at | date:'MMM dd' }}</td>
+                    <td>
+                      <a [href]="'/quiz/' + quiz.quiz_code" class="btn btn-primary btn-sm" target="_blank">
+                        Take Quiz
+                      </a>
+                    </td>
+                  </tr>
+                  <tr *ngIf="quizzes.length === 0">
+                    <td colspan="6" class="text-center p-8">
+                      <div class="text-secondary-500">
+                        <div class="text-4xl mb-2">📝</div>
+                        <p>No active quizzes for your class</p>
+                        <p class="text-sm">Quizzes will appear here when teachers create them</p>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- Loading Overlay -->
   <div *ngIf="loading" class="loading-overlay">
     <div class="spinner"></div>
   </div>

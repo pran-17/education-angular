@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongo:
+    image: mongo:7.0
+    container_name: education-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: education
+    volumes:
+      - mongo_data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - education-network
+
+  # Backend API
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: backend-build
+    container_name: education-backend
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - MONGODB_URI=mongodb://admin:password123@mongo:27017/education?authSource=admin
+    depends_on:
+      - mongo
+    networks:
+      - education-network
+
+  # Frontend (Angular)
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: angular-build
+    container_name: education-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - education-network
+
+volumes:
+  mongo_data:
+
+networks:
+  education-network:
+    driver: bridge

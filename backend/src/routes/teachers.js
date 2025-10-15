@@ -54,6 +54,31 @@ router.post('/login', async (req, res) => {
   });
 });
 
+// Update teacher
+router.put('/:id', async (req, res) => {
+  try {
+    const { password, ...data } = req.body;
+    const update = { ...data };
+    if (password) update.passwordHash = await bcrypt.hash(password, 10);
+    const updated = await Teacher.findByIdAndUpdate(req.params.id, update, { new: true });
+    if (!updated) return res.status(404).json({ message: 'Teacher not found' });
+    res.json(updated);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating teacher', error: error.message });
+  }
+});
+
+// Delete teacher
+router.delete('/:id', async (req, res) => {
+  try {
+    const deleted = await Teacher.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ message: 'Teacher not found' });
+    res.json({ success: true, message: 'Teacher deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting teacher', error: error.message });
+  }
+});
+
 export default router;
 
 

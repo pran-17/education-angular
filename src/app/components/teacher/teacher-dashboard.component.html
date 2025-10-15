@@ -1,282 +1,490 @@
 <div class="teacher-container">
-  <header class="teacher-header">
-    <div>
-      <button (click)="goHome()" class="home-btn">← Home</button>
-      <h1>Teacher Dashboard</h1>
-      <p class="teacher-info">Welcome, {{ currentUser?.name }}</p>
+  <!-- Header Section -->
+  <header class="navbar">
+    <div class="container d-flex justify-between items-center">
+      <div class="d-flex items-center gap-4">
+        <button (click)="goHome()" class="btn btn-secondary btn-sm">
+          <span>←</span> Home
+        </button>
+        <div>
+          <h1 class="navbar-brand mb-0">Teacher Dashboard</h1>
+          <p class="text-sm text-secondary-600">Welcome, {{ currentUser?.name }}</p>
+        </div>
+      </div>
+      <div class="d-flex items-center gap-3">
+        <div class="text-right">
+          <p class="text-sm font-medium">{{ currentUser?.subject }} Teacher</p>
+          <p class="text-xs text-secondary-500">ID: {{ currentUser?.teacher_id }}</p>
+        </div>
+        <button (click)="logout()" class="btn btn-danger btn-sm">
+          <span>🚪</span> Logout
+        </button>
+      </div>
     </div>
-    <button (click)="logout()" class="logout-btn">Logout</button>
   </header>
 
-  <div class="tabs">
-    <button [class.active]="activeTab === 'profile'" (click)="setActiveTab('profile')" class="tab-btn">
-      Profile
-    </button>
-    <button [class.active]="activeTab === 'marks'" (click)="setActiveTab('marks')" class="tab-btn">
-      Manage Marks
-    </button>
-    <button [class.active]="activeTab === 'students'" (click)="setActiveTab('students')" class="tab-btn">
-      Students
-    </button>
-    <button [class.active]="activeTab === 'quiz'" (click)="setActiveTab('quiz')" class="tab-btn">
-      Generate Quiz
-    </button>
-    <button [class.active]="activeTab === 'attendance'" (click)="setActiveTab('attendance')" class="tab-btn">
-      Mark Attendance
-    </button>
-  </div>
-
-  <div class="message" *ngIf="message" [class.success]="messageType === 'success'" [class.error]="messageType === 'error'">
-    {{ message }}
-  </div>
-
-  <div class="content">
-    <div *ngIf="activeTab === 'profile'" class="tab-content">
-      <div class="profile-card">
-        <h2>Your Profile</h2>
-        <div class="profile-info">
-          <div class="info-item">
-            <span class="label">Name:</span>
-            <span class="value">{{ currentUser?.name }}</span>
+  <!-- Stats Overview -->
+  <div class="container mt-6">
+    <div class="row mb-8">
+      <div class="col-3">
+        <div class="card text-center">
+          <div class="card-body">
+            <div class="text-3xl font-bold text-primary-600 mb-2">👨‍🎓</div>
+            <h3 class="text-2xl font-bold text-secondary-900">{{ students.length }}</h3>
+            <p class="text-secondary-600">Total Students</p>
           </div>
-          <div class="info-item">
-            <span class="label">Teacher ID:</span>
-            <span class="value">{{ currentUser?.teacher_id }}</span>
+        </div>
+      </div>
+      <div class="col-3">
+        <div class="card text-center">
+          <div class="card-body">
+            <div class="text-3xl font-bold text-success-600 mb-2">📊</div>
+            <h3 class="text-2xl font-bold text-secondary-900">{{ studentMarks.length }}</h3>
+            <p class="text-secondary-600">Marks Records</p>
           </div>
-          <div class="info-item">
-            <span class="label">Email:</span>
-            <span class="value">{{ currentUser?.email }}</span>
+        </div>
+      </div>
+      <div class="col-3">
+        <div class="card text-center">
+          <div class="card-body">
+            <div class="text-3xl font-bold text-warning-600 mb-2">📝</div>
+            <h3 class="text-2xl font-bold text-secondary-900">{{ quizzes.length }}</h3>
+            <p class="text-secondary-600">Quizzes Created</p>
           </div>
-          <div class="info-item">
-            <span class="label">Subject:</span>
-            <span class="value">{{ currentUser?.subject }}</span>
+        </div>
+      </div>
+      <div class="col-3">
+        <div class="card text-center">
+          <div class="card-body">
+            <div class="text-3xl font-bold text-primary-600 mb-2">📚</div>
+            <h3 class="text-2xl font-bold text-secondary-900">{{ currentUser?.subject }}</h3>
+            <p class="text-secondary-600">Subject</p>
           </div>
         </div>
       </div>
     </div>
 
-    <div *ngIf="activeTab === 'marks'" class="tab-content">
-      <div class="marks-section">
-        <h2>Student Marks Management</h2>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Student ID</th>
-                <th>Student Name</th>
-                <th>Class</th>
-                <th>Subject</th>
-                <th>Test 1</th>
-                <th>Test 2</th>
-                <th>CAT 1</th>
-                <th>Mid-Sem</th>
-                <th>Quiz</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let mark of studentMarks">
-                <ng-container *ngIf="editingMarks?._id !== mark._id">
-                  <td>{{ mark.students?.student_id || 'N/A' }}</td>
-                  <td>{{ mark.students?.name || 'N/A' }}</td>
-                  <td>{{ mark.students?.class || 'N/A' }}</td>
-                  <td>{{ mark.subject_code }}</td>
-                  <td>{{ mark.test1 || 0 }}</td>
-                  <td>{{ mark.test2 || 0 }}</td>
-                  <td>{{ mark.cat1 || 0 }}</td>
-                  <td>{{ mark.mid_semester || 0 }}</td>
-                  <td>{{ mark.quiz_marks || 0 }}</td>
-                  <td>
-                    <button (click)="editMarks(mark)" class="edit-btn">Edit</button>
-                  </td>
-                </ng-container>
-                <ng-container *ngIf="editingMarks?._id === mark._id">
-                  <td>{{ mark.students?.student_id || 'N/A' }}</td>
-                  <td>{{ mark.students?.name || 'N/A' }}</td>
-                  <td>{{ mark.students?.class || 'N/A' }}</td>
-                  <td>{{ mark.subject_code }}</td>
-                  <td><input type="number" [(ngModel)]="editingMarks.test1" class="mark-input"></td>
-                  <td><input type="number" [(ngModel)]="editingMarks.test2" class="mark-input"></td>
-                  <td><input type="number" [(ngModel)]="editingMarks.cat1" class="mark-input"></td>
-                  <td><input type="number" [(ngModel)]="editingMarks.mid_semester" class="mark-input"></td>
-                  <td>{{ mark.quiz_marks || 0 }}</td>
-                  <td>
-                    <button (click)="saveMarks()" class="save-btn">Save</button>
-                    <button (click)="cancelEdit()" class="cancel-btn">Cancel</button>
-                  </td>
-                </ng-container>
-              </tr>
-              <tr *ngIf="studentMarks.length === 0">
-                <td colspan="10" class="empty">No marks data available</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+    <!-- Alert Messages -->
+    <div *ngIf="message" class="alert" [class.alert-success]="messageType === 'success'" [class.alert-error]="messageType === 'error'">
+      <div class="d-flex items-center gap-2">
+        <span *ngIf="messageType === 'success'">✅</span>
+        <span *ngIf="messageType === 'error'">❌</span>
+        {{ message }}
       </div>
     </div>
 
-    <div *ngIf="activeTab === 'students'" class="tab-content">
-      <div class="students-section">
-        <h2>All Students ({{ students.length }})</h2>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Student ID</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Class</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let student of students">
-                <td>{{ student.student_id }}</td>
-                <td>{{ student.name }}</td>
-                <td>{{ student.email }}</td>
-                <td>{{ student.class }}</td>
-              </tr>
-              <tr *ngIf="students.length === 0">
-                <td colspan="4" class="empty">No students found</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+    <!-- Navigation Tabs -->
+    <div class="tab-nav">
+      <button [class.active]="activeTab === 'profile'" (click)="setActiveTab('profile')" class="tab-item">
+        <span>👤</span> Profile
+      </button>
+      <button [class.active]="activeTab === 'marks'" (click)="setActiveTab('marks')" class="tab-item">
+        <span>📊</span> Manage Marks
+      </button>
+      <button [class.active]="activeTab === 'students'" (click)="setActiveTab('students')" class="tab-item">
+        <span>👨‍🎓</span> Students
+      </button>
+      <button [class.active]="activeTab === 'quiz'" (click)="setActiveTab('quiz')" class="tab-item">
+        <span>📝</span> Generate Quiz
+      </button>
+      <button [class.active]="activeTab === 'attendance'" (click)="setActiveTab('attendance')" class="tab-item">
+        <span>📋</span> Mark Attendance
+      </button>
     </div>
 
-    <div *ngIf="activeTab === 'quiz'" class="tab-content">
-      <div class="quiz-section">
-        <h2>Generate Quiz</h2>
-        <form class="quiz-form">
-          <div class="form-row">
-            <div class="form-group">
-              <label>Subject Code</label>
-              <input type="text" [(ngModel)]="newQuiz.subject_code" name="subject_code" placeholder="e.g., CS101">
-            </div>
-            <div class="form-group">
-              <label>Class</label>
-              <input type="text" [(ngModel)]="newQuiz.class" name="class" placeholder="e.g., 10A">
-            </div>
-          </div>
-
-          <div class="questions-container">
-            <h3>Questions</h3>
-            <div *ngFor="let question of newQuiz.questions; let i = index" class="question-block">
-              <div class="question-header">
-                <h4>Question {{ i + 1 }}</h4>
-                <button type="button" (click)="removeQuestion(i)" class="remove-btn" *ngIf="newQuiz.questions.length > 1">
-                  Remove
-                </button>
+    <!-- Tab Content -->
+    <div class="content">
+      <!-- Profile Tab -->
+      <div *ngIf="activeTab === 'profile'" class="tab-content">
+        <div class="row">
+          <div class="col-6">
+            <div class="card">
+              <div class="card-header">
+                <h2 class="card-title">Your Profile</h2>
+                <p class="card-subtitle">Personal information and account details</p>
               </div>
-              <div class="form-group">
-                <label>Question</label>
-                <input type="text" [(ngModel)]="question.question" [name]="'question_' + i" placeholder="Enter question">
-              </div>
-              <div class="options-grid">
-                <div class="form-group" *ngFor="let option of question.options; let j = index">
-                  <label>Option {{ j + 1 }}</label>
-                  <input type="text" [(ngModel)]="question.options[j]" [name]="'option_' + i + '_' + j" placeholder="Enter option">
+              <div class="card-body">
+                <div class="d-flex flex-column gap-4">
+                  <div class="d-flex items-center gap-4">
+                    <div class="avatar text-2xl">👨‍🏫</div>
+                    <div>
+                      <h3 class="text-xl font-bold">{{ currentUser?.name }}</h3>
+                      <p class="text-secondary-600">{{ currentUser?.subject }} Teacher</p>
+                    </div>
+                  </div>
+                  <div class="d-flex flex-column gap-3">
+                    <div class="d-flex justify-between items-center p-3 rounded-lg" style="background: var(--primary-50);">
+                      <span class="font-medium">Teacher ID:</span>
+                      <span class="badge badge-primary">{{ currentUser?.teacher_id }}</span>
+                    </div>
+                    <div class="d-flex justify-between items-center p-3 rounded-lg" style="background: var(--secondary-50);">
+                      <span class="font-medium">Email:</span>
+                      <span>{{ currentUser?.email }}</span>
+                    </div>
+                    <div class="d-flex justify-between items-center p-3 rounded-lg" style="background: var(--success-50);">
+                      <span class="font-medium">Subject:</span>
+                      <span class="badge badge-success">{{ currentUser?.subject }}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div class="form-group">
-                <label>Correct Answer</label>
-                <select [(ngModel)]="question.correctAnswer" [name]="'correct_' + i">
-                  <option [value]="0">Option 1</option>
-                  <option [value]="1">Option 2</option>
-                  <option [value]="2">Option 3</option>
-                  <option [value]="3">Option 4</option>
-                </select>
-              </div>
-            </div>
-
-            <button type="button" (click)="addQuestion()" class="add-question-btn">
-              Add Another Question
-            </button>
-          </div>
-
-          <button type="button" (click)="generateQuiz()" class="generate-btn" [disabled]="loading">
-            {{ loading ? 'Generating...' : 'Generate Quiz' }}
-          </button>
-        </form>
-
-        <div *ngIf="qrCodeDataUrl" class="quiz-result">
-          <h3>Quiz Generated Successfully!</h3>
-          <div class="quiz-info">
-            <div class="qr-code">
-              <img [src]="qrCodeDataUrl" alt="Quiz QR Code">
-              <p>Scan to access quiz</p>
-            </div>
-            <div class="quiz-link">
-              <label>Quiz Link:</label>
-              <div class="link-container">
-                <input type="text" [value]="quizLink" readonly>
-                <button (click)="copyQuizLink()" class="copy-btn">Copy</button>
-              </div>
-              <p class="info-text">Share this link or QR code with students. Attendance will be automatically marked when they submit the quiz.</p>
             </div>
           </div>
-          <button (click)="resetQuizForm()" class="reset-btn">Create Another Quiz</button>
-        </div>
-
-        <div class="recent-quizzes" *ngIf="quizzes.length > 0">
-          <h3>Recent Quizzes</h3>
-          <div class="quizzes-list">
-            <div *ngFor="let quiz of quizzes" class="quiz-item">
-              <div>
-                <strong>{{ quiz.subject_code }}</strong> - {{ quiz.class }}
-                <span class="quiz-code">Code: {{ quiz.quiz_code }}</span>
+          <div class="col-6">
+            <div class="card">
+              <div class="card-header">
+                <h2 class="card-title">Quick Stats</h2>
+                <p class="card-subtitle">Your teaching overview</p>
               </div>
-              <span [class.active]="quiz.active" [class.inactive]="!quiz.active">
-                {{ quiz.active ? 'Active' : 'Expired' }}
-              </span>
+              <div class="card-body">
+                <div class="d-flex flex-column gap-4">
+                  <div class="d-flex justify-between items-center">
+                    <span>Total Students:</span>
+                    <span class="font-bold text-primary-600">{{ students.length }}</span>
+                  </div>
+                  <div class="d-flex justify-between items-center">
+                    <span>Marks Records:</span>
+                    <span class="font-bold text-success-600">{{ studentMarks.length }}</span>
+                  </div>
+                  <div class="d-flex justify-between items-center">
+                    <span>Quizzes Created:</span>
+                    <span class="font-bold text-warning-600">{{ quizzes.length }}</span>
+                  </div>
+                  <div class="d-flex justify-between items-center">
+                    <span>Active Quizzes:</span>
+                    <span class="font-bold text-primary-600">{{ getActiveQuizzesCount() }}</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div *ngIf="activeTab === 'attendance'" class="tab-content">
-      <div class="attendance-section">
-        <h2>Mark Attendance</h2>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Student ID</th>
-                <th>Name</th>
-                <th>Class</th>
-                <th>Subject Code</th>
-                <th>Date</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let student of students">
-                <td>{{ student.student_id }}</td>
-                <td>{{ student.name }}</td>
-                <td>{{ student.class }}</td>
-                <td>
-                  <input type="text" [(ngModel)]="student._att_subject" placeholder="e.g., CS101">
-                </td>
-                <td>
-                  <input type="date" [(ngModel)]="student._att_date">
-                </td>
-                <td>
-                  <select [(ngModel)]="student._att_status">
-                    <option value="Present">Present</option>
-                    <option value="Absent">Absent</option>
-                  </select>
-                </td>
-                <td>
-                  <button (click)="markAttendance(student)" class="save-btn">Save</button>
-                </td>
-              </tr>
-              <tr *ngIf="students.length === 0">
-                <td colspan="7" class="empty">No students found</td>
-              </tr>
-            </tbody>
-          </table>
+      <!-- Marks Tab -->
+      <div *ngIf="activeTab === 'marks'" class="tab-content">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Student Marks Management</h2>
+            <p class="card-subtitle">Update and manage student grades</p>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-container">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Class</th>
+                    <th>Subject</th>
+                    <th>Test 1</th>
+                    <th>Test 2</th>
+                    <th>CAT 1</th>
+                    <th>Mid-Sem</th>
+                    <th>Quiz</th>
+                    <th>Total</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let mark of studentMarks">
+                    <ng-container *ngIf="editingMarks?._id !== mark._id">
+                      <td>
+                        <div class="d-flex items-center gap-2">
+                          <div class="avatar">👨‍🎓</div>
+                          <div>
+                            <div class="font-medium">{{ mark.students?.name || 'N/A' }}</div>
+                            <div class="text-xs text-secondary-500">{{ mark.students?.student_id || 'N/A' }}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td><span class="badge badge-warning">{{ mark.students?.class || 'N/A' }}</span></td>
+                      <td><span class="badge badge-secondary">{{ mark.subject_code }}</span></td>
+                      <td><span class="font-medium">{{ mark.test1 || 0 }}</span></td>
+                      <td><span class="font-medium">{{ mark.test2 || 0 }}</span></td>
+                      <td><span class="font-medium">{{ mark.cat1 || 0 }}</span></td>
+                      <td><span class="font-medium">{{ mark.mid_semester || 0 }}</span></td>
+                      <td><span class="font-medium text-success-600">{{ mark.quiz_marks || 0 }}</span></td>
+                      <td><span class="font-bold text-primary-600">{{ getTotalMarks(mark) }}</span></td>
+                      <td>
+                        <button (click)="editMarks(mark)" class="btn btn-sm btn-primary">Edit</button>
+                      </td>
+                    </ng-container>
+                    <ng-container *ngIf="editingMarks?._id === mark._id">
+                      <td>
+                        <div class="d-flex items-center gap-2">
+                          <div class="avatar">👨‍🎓</div>
+                          <div>
+                            <div class="font-medium">{{ mark.students?.name || 'N/A' }}</div>
+                            <div class="text-xs text-secondary-500">{{ mark.students?.student_id || 'N/A' }}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td><span class="badge badge-warning">{{ mark.students?.class || 'N/A' }}</span></td>
+                      <td><span class="badge badge-secondary">{{ mark.subject_code }}</span></td>
+                      <td><input type="number" [(ngModel)]="editingMarks.test1" class="form-control" style="width: 80px;" min="0" max="100"></td>
+                      <td><input type="number" [(ngModel)]="editingMarks.test2" class="form-control" style="width: 80px;" min="0" max="100"></td>
+                      <td><input type="number" [(ngModel)]="editingMarks.cat1" class="form-control" style="width: 80px;" min="0" max="100"></td>
+                      <td><input type="number" [(ngModel)]="editingMarks.mid_semester" class="form-control" style="width: 80px;" min="0" max="100"></td>
+                      <td><span class="font-medium text-success-600">{{ mark.quiz_marks || 0 }}</span></td>
+                      <td><span class="font-bold text-primary-600">{{ getTotalMarks(editingMarks) }}</span></td>
+                      <td>
+                        <div class="d-flex gap-1">
+                          <button (click)="saveMarks()" class="btn btn-sm btn-success">Save</button>
+                          <button (click)="cancelEdit()" class="btn btn-sm btn-secondary">Cancel</button>
+                        </div>
+                      </td>
+                    </ng-container>
+                  </tr>
+                  <tr *ngIf="studentMarks.length === 0">
+                    <td colspan="10" class="text-center p-8">
+                      <div class="text-secondary-500">
+                        <div class="text-4xl mb-2">📊</div>
+                        <p>No marks data available</p>
+                        <p class="text-sm">Marks will appear here once students are assigned to your subject</p>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Students Tab -->
+      <div *ngIf="activeTab === 'students'" class="tab-content">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">All Students ({{ students.length }})</h2>
+            <p class="card-subtitle">View and manage student information</p>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-container">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Student ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Class</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let student of students">
+                    <td><span class="badge badge-success">{{ student.student_id }}</span></td>
+                    <td>
+                      <div class="d-flex items-center gap-2">
+                        <div class="avatar">👨‍🎓</div>
+                        <span class="font-medium">{{ student.name }}</span>
+                      </div>
+                    </td>
+                    <td>{{ student.email }}</td>
+                    <td><span class="badge badge-warning">{{ student.class }}</span></td>
+                    <td>
+                      <button class="btn btn-sm btn-secondary">View Details</button>
+                    </td>
+                  </tr>
+                  <tr *ngIf="students.length === 0">
+                    <td colspan="5" class="text-center p-8">
+                      <div class="text-secondary-500">
+                        <div class="text-4xl mb-2">👨‍🎓</div>
+                        <p>No students found</p>
+                        <p class="text-sm">Students will appear here once they are added by the admin</p>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quiz Tab -->
+      <div *ngIf="activeTab === 'quiz'" class="tab-content">
+        <div class="row">
+          <!-- Quiz Creation Form -->
+          <div class="col-6">
+            <div class="card">
+              <div class="card-header">
+                <h2 class="card-title">Generate Quiz</h2>
+                <p class="card-subtitle">Create interactive quizzes for your students</p>
+              </div>
+              <div class="card-body">
+                <form class="d-flex flex-column gap-4">
+                  <div class="form-group">
+                    <label class="form-label">Subject Code</label>
+                    <input type="text" [(ngModel)]="newQuiz.subject_code" name="subject_code" class="form-control" placeholder="e.g., CS101" required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Class</label>
+                    <input type="text" [(ngModel)]="newQuiz.class" name="class" class="form-control" placeholder="e.g., 10A" required>
+                  </div>
+
+                  <div class="questions-container">
+                    <h3 class="text-lg font-bold mb-4">Questions</h3>
+                    <div *ngFor="let question of newQuiz.questions; let i = index" class="question-block mb-6 p-4 rounded-lg" style="background: var(--secondary-50);">
+                      <div class="d-flex justify-between items-center mb-4">
+                        <h4 class="font-bold">Question {{ i + 1 }}</h4>
+                        <button type="button" (click)="removeQuestion(i)" class="btn btn-sm btn-danger" *ngIf="newQuiz.questions.length > 1">
+                          Remove
+                        </button>
+                      </div>
+                      <div class="form-group">
+                        <label class="form-label">Question Text</label>
+                        <input type="text" [(ngModel)]="question.question" [name]="'question_' + i" class="form-control" placeholder="Enter question" required>
+                      </div>
+                      <div class="row">
+                        <div class="col-6" *ngFor="let option of question.options; let j = index">
+                          <div class="form-group">
+                            <label class="form-label">Option {{ j + 1 }}</label>
+                            <input type="text" [(ngModel)]="question.options[j]" [name]="'option_' + i + '_' + j" class="form-control" placeholder="Enter option" required>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label class="form-label">Correct Answer</label>
+                        <select [(ngModel)]="question.correctAnswer" [name]="'correct_' + i" class="form-control" required>
+                          <option [value]="0">Option 1</option>
+                          <option [value]="1">Option 2</option>
+                          <option [value]="2">Option 3</option>
+                          <option [value]="3">Option 4</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <button type="button" (click)="addQuestion()" class="btn btn-secondary w-full mb-4">
+                      <span>➕</span> Add Another Question
+                    </button>
+                  </div>
+
+                  <button type="button" (click)="generateQuiz()" class="btn btn-primary w-full" [disabled]="loading">
+                    <span *ngIf="loading" class="spinner"></span>
+                    {{ loading ? 'Generating Quiz...' : 'Generate Quiz' }}
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quiz Results and Recent Quizzes -->
+          <div class="col-6">
+            <!-- Quiz Result -->
+            <div *ngIf="qrCodeDataUrl" class="card mb-6">
+              <div class="card-header">
+                <h2 class="card-title text-success-600">✅ Quiz Generated Successfully!</h2>
+                <p class="card-subtitle">Share with your students</p>
+              </div>
+              <div class="card-body">
+                <div class="d-flex flex-column gap-4">
+                  <div class="text-center">
+                    <div class="qr-code mb-4">
+                      <img [src]="qrCodeDataUrl" alt="Quiz QR Code" class="rounded-lg shadow" style="max-width: 200px;">
+                      <p class="text-sm text-secondary-600 mt-2">Scan to access quiz</p>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Quiz Link:</label>
+                    <div class="d-flex gap-2">
+                      <input type="text" [value]="quizLink" readonly class="form-control">
+                      <button (click)="copyQuizLink()" class="btn btn-secondary">Copy</button>
+                    </div>
+                    <p class="text-xs text-secondary-500 mt-2">Share this link or QR code with students. Attendance will be automatically marked when they submit the quiz.</p>
+                  </div>
+                  <button (click)="resetQuizForm()" class="btn btn-warning w-full">Create Another Quiz</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recent Quizzes -->
+            <div class="card" *ngIf="quizzes.length > 0">
+              <div class="card-header">
+                <h2 class="card-title">Recent Quizzes</h2>
+                <p class="card-subtitle">Your quiz history</p>
+              </div>
+              <div class="card-body">
+                <div class="d-flex flex-column gap-3">
+                  <div *ngFor="let quiz of quizzes" class="d-flex justify-between items-center p-3 rounded-lg" style="background: var(--secondary-50);">
+                    <div>
+                      <div class="font-medium">{{ quiz.subject_code }} - {{ quiz.class }}</div>
+                      <div class="text-sm text-secondary-600">Code: {{ quiz.quiz_code }}</div>
+                    </div>
+                    <span [class]="quiz.active ? 'badge badge-success' : 'badge badge-secondary'">
+                      {{ quiz.active ? 'Active' : 'Expired' }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Attendance Tab -->
+      <div *ngIf="activeTab === 'attendance'" class="tab-content">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Mark Attendance</h2>
+            <p class="card-subtitle">Record student attendance for your classes</p>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-container">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Class</th>
+                    <th>Subject Code</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let student of students">
+                    <td>
+                      <div class="d-flex items-center gap-2">
+                        <div class="avatar">👨‍🎓</div>
+                        <div>
+                          <div class="font-medium">{{ student.name }}</div>
+                          <div class="text-xs text-secondary-500">{{ student.student_id }}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td><span class="badge badge-warning">{{ student.class }}</span></td>
+                    <td>
+                      <input type="text" [(ngModel)]="student._att_subject" class="form-control" placeholder="e.g., CS101" style="width: 120px;">
+                    </td>
+                    <td>
+                      <input type="date" [(ngModel)]="student._att_date" class="form-control" style="width: 150px;">
+                    </td>
+                    <td>
+                      <select [(ngModel)]="student._att_status" class="form-control" style="width: 120px;">
+                        <option value="Present">Present</option>
+                        <option value="Absent">Absent</option>
+                      </select>
+                    </td>
+                    <td>
+                      <button (click)="markAttendance(student)" class="btn btn-sm btn-success" [disabled]="loading">
+                        <span *ngIf="loading" class="spinner"></span>
+                        Save
+                      </button>
+                    </td>
+                  </tr>
+                  <tr *ngIf="students.length === 0">
+                    <td colspan="6" class="text-center p-8">
+                      <div class="text-secondary-500">
+                        <div class="text-4xl mb-2">📋</div>
+                        <p>No students found</p>
+                        <p class="text-sm">Students will appear here once they are added by the admin</p>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>

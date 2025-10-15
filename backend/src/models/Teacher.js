@@ -2,9 +2,9 @@ import mongoose from 'mongoose';
 
 const teacherSchema = new mongoose.Schema(
   {
-    teacher_id: { type: String, required: true, index: true },
+    teacher_id: { type: String, required: true, unique: true },
     name: { type: String, required: true },
-    email: { type: String, required: true, unique: true, lowercase: true, index: true },
+    email: { type: String, required: true, unique: true, lowercase: true },
     passwordHash: { type: String, required: true },
     subject: { type: String },
     department: { type: String },
@@ -16,8 +16,7 @@ const teacherSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-teacherSchema.index({ email: 1 }, { unique: true });
-teacherSchema.index({ teacher_id: 1 }, { unique: false });
+// Indexes are already defined in the schema above
 
 export default mongoose.model('Teacher', teacherSchema);
 
